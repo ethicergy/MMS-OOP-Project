@@ -22,7 +22,7 @@ public DBManager () throws SQLException{
         try {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
-                System.out.println("🔌 Connection closed.");
+                System.out.println("connection closed.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
