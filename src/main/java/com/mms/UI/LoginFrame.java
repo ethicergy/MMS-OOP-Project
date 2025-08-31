@@ -1,99 +1,105 @@
 package com.mms.UI;
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
 public class LoginFrame extends JFrame {
     public LoginFrame() {
+        setLayout(new GridBagLayout()); // centers loginBox
         setTitle("Login");
-        setSize(800, 600);
+        setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setIconImage(new ImageIcon("title-logo.png").getImage());
+        getContentPane().setBackground(new Color(234, 224, 213));
 
-        Container contentPane = getContentPane();
-        contentPane.setBackground(Color.white);
-        contentPane.setLayout(new BorderLayout());
+        // Login box
+        JPanel loginBox = new JPanel(new BorderLayout());
+        loginBox.setPreferredSize(new Dimension(700, 500));
+        loginBox.setBackground(new Color(198, 172, 143));
+        loginBox.setBorder(BorderFactory.createLineBorder(new Color(94, 80, 63), 4));
 
-        // --- Top Panel: App Title ---
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setOpaque(false);
+        // Logo
+        ImageIcon logo = new ImageIcon("title-logo.png");
+        Image scaledImage = logo.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(scaledImage), SwingConstants.CENTER);
+        logoLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        loginBox.add(logoLabel, BorderLayout.NORTH);
 
-        JLabel appTitle = new JLabel("Movie Ticket Booking");
-        appTitle.setFont(new Font("Arial", Font.BOLD, 26));
-        appTitle.setForeground(new Color(0, 0, 0, 120)); // semi-transparent
-        appTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 0));
-        topPanel.add(appTitle, BorderLayout.WEST);
-
-        contentPane.add(topPanel, BorderLayout.NORTH);
-
-        // --- Login Heading ---
-        JLabel heading = new JLabel("Login", SwingConstants.CENTER);
-        heading.setFont(new Font("Arial", Font.BOLD, 45));
-        heading.setForeground(Color.black);
-        heading.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
-
-        // --- Form Panel ---
+        // Form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setOpaque(false);
+        formPanel.setBackground(new Color(198, 172, 143));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(1, 80, 40, 80));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.insets = new Insets(15, 15, 15, 15); // spacing
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        Font fieldFont = new Font("SansSerif", Font.PLAIN, 18); 
+        Font labelFont = new Font("SansSerif", Font.BOLD, 18);
+
+        // Username row
+        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.LINE_END;
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        JTextField userField = new JTextField(15);
-        userField.setFont(new Font("Arial", Font.PLAIN, 18));
-
-        JLabel passLabel = new JLabel("Password:");
-        passLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        JPasswordField passField = new JPasswordField(15);
-        passField.setFont(new Font("Arial", Font.PLAIN, 18));
-
-        // add username row
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        userLabel.setFont(labelFont);
         formPanel.add(userLabel, gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
-        formPanel.add(userField, gbc);
 
-        // add password row
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        JTextField usernameField = new JTextField(15);
+        usernameField.setFont(fieldFont);
+        usernameField.setPreferredSize(new Dimension(250, 35)); 
+        formPanel.add(usernameField, gbc);
+
+        // Password row
+        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(labelFont);
         formPanel.add(passLabel, gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
-        formPanel.add(passField, gbc);
 
-        // add login button
-        JButton loginButton = new JButton("Login");
-        loginButton.setFont(new Font("Arial", Font.BOLD, 18));
-        loginButton.setBackground(new Color(33, 182, 168));
-        loginButton.setForeground(Color.white);
-        loginButton.setFocusPainted(false);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        JPasswordField passwordField = new JPasswordField(15);
+        passwordField.setFont(fieldFont);
+        passwordField.setPreferredSize(new Dimension(250, 35)); 
+        formPanel.add(passwordField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        // Login button
+        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridwidth = 2; 
         gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(loginButton, gbc);
+        JButton loginBtn = new JButton("Login");
+        loginBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
+        loginBtn.setPreferredSize(new Dimension(200, 45));
+        loginBtn.setBackground(new Color(34,51,59));
+        loginBtn.setFocusable(false);
+        loginBtn.setForeground(Color.WHITE);
+        formPanel.add(loginBtn, gbc);
 
-        // --- Container to center heading + form ---
-        JPanel formContainer = new JPanel();
-        formContainer.setLayout(new BorderLayout());
-        formContainer.setOpaque(false);
-        formContainer.add(heading, BorderLayout.NORTH);
-        formContainer.add(formPanel, BorderLayout.CENTER);
+        // Register link (styled label)
+        gbc.gridy = 3;
+        JLabel registerLabel = new JLabel("<HTML><U>New user? Register here</U></HTML>");
+        registerLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        registerLabel.setForeground(Color.BLUE);
+        registerLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        registerLabel.setForeground(new Color(10,9,8));
+        formPanel.add(registerLabel, gbc);
 
-        // Add padding around form container
-        JPanel wrapper = new JPanel(new GridBagLayout());
-        wrapper.setOpaque(false);
-        GridBagConstraints wrapperGbc = new GridBagConstraints();
-        wrapperGbc.gridy = 0;
-        wrapperGbc.weighty = 0.8; // pushes it slightly upwards instead of dead center
-        wrapper.add(formContainer, wrapperGbc);
+        // Add click event (just an example)
+        registerLabel.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                JOptionPane.showMessageDialog(LoginFrame.this, "Open registration form here.");
+            }
+        });
 
-        contentPane.add(wrapper, BorderLayout.CENTER);
+        loginBox.add(formPanel, BorderLayout.CENTER);
+        add(loginBox, new GridBagConstraints());
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new LoginFrame().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }
