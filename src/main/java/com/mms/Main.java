@@ -2,32 +2,68 @@ package com.mms;
 
 import com.mms.db.DBManager;
 import com.mms.dao.UserDAO;
+import com.mms.dao.MovieDAO;
 import com.mms.models.User;
-import com.mms.UI.LoginFrame;   // explicitly import LoginFrame
-import javax.swing.SwingUtilities;
+import com.mms.models.Movie;
+
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        // --- Database test ---
+
+        // ✅ Basic DB connection test
         try (DBManager db = new DBManager()) {
-            System.out.println("DB connection working till now");
+            System.out.println("✅ DB connection works");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        // ✅ Test UserDAO (already done earlier)
         UserDAO userDAO = new UserDAO();
         User newUser = new User("Protagonist", "tenet@gmail.com", "tenet", "user");
-        boolean working = userDAO.createUser(newUser);
+        boolean userCreated = userDAO.createUser(newUser);
+        System.out.println(userCreated ? "✅ User created" : "❌ User creation failed");
 
-        if (working) {
-            System.out.println("User creation working");
+        // ✅ Now test MovieDAO
+        MovieDAO movieDAO = new MovieDAO();
+
+        // 1. Create Movie
+        Movie inception = new Movie("Inception", 148, "Sci-Fi", "English", "U/A", "https://poster.com/inception.jpg");
+        boolean created = movieDAO.createMovie(inception);
+        System.out.println(created ? "✅ Movie created" : "❌ Movie creation failed");
+
+        // 2. Get Movie by ID (assuming ID = 1 for test)
+        Movie fetched = movieDAO.getMoviebyId(1);
+        if (fetched != null) {
+            System.out.println("🎬 Fetched Movie: " + fetched);
         } else {
-            System.out.println("User creation failed");
+            System.out.println("❌ No movie found with ID 1");
         }
 
-        // --- Launch Login UI ---
-        SwingUtilities.invokeLater(() -> {
-            new LoginFrame().setVisible(true);
-        });
-    }
+        // 3. Get All Movies
+        List<Movie> movies = movieDAO.getAllMovies();
+        System.out.println("📽️ All Movies:");
+        for (Movie m : movies) {
+            System.out.println(" - " + m);
+        }
+
+        // 4. Update Movie
+        if (fetched != null) {
+            fetched.setDuration(150);
+            fetched.setGenre("Thriller");
+            fetched.setPosterUrl("https://poster.com/inception_updated.jpg");
+
+            boolean updated = movieDAO.updateMovie(fetched);
+            System.out.println(updated ? "✅ Movie updated" : "❌ Movie update failed");
+        }
+
+        // 5. Search Movies (by title substring)
+        List<Movie> searchResults = movieDAO.searchMovies("Incep", null, null, null);
+        System.out.println("🔍 Search Results for 'Incep':");
+        for (Movie m : searchResults) {
+            System.out.println(" - " + m);
+        }
+
+        // 6. Delete Movie (ID = 1 for test)
+       }
 }
