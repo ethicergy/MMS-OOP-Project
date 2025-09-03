@@ -8,72 +8,104 @@ public class TicketBooking {
     public static void main(String[] args) {
         JFrame frame = new JFrame("NOW SHOWING: Book Your Movie");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 800);
-        frame.getContentPane().setBackground(new Color(235, 224, 213)); // Light beige background
-        frame.setLayout(null); // Absolute positioning
+        frame.setSize(1920, 1080);
 
-        // Title Label
-        JLabel titleLabel = new JLabel("NOW SHOWING: Book Your Movie");
+        // Background color
+        Color bgColor = new Color(234, 224, 213);
+        frame.getContentPane().setBackground(bgColor);
+        frame.setLayout(new BorderLayout());
+
+        // Title
+        JLabel titleLabel = new JLabel("NOW SHOWING: Book Your Movie", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setBounds(370, 20, 650, 30);
-        frame.add(titleLabel);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0)); // spacing below title
+        frame.add(titleLabel, BorderLayout.NORTH);
 
-        // Movie List Panel
-        JPanel moviePanel = new JPanel();
-        moviePanel.setBackground(new Color(188, 155, 103)); // Brownish background
-        moviePanel.setLayout(null);  // Important: for absolute positioning inside panel
-        moviePanel.setBounds(100, 70, 1000, 650); // Bigger panel to fit all movies
-        moviePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        frame.add(moviePanel);
+        // Movie list panel
+        JPanel movieListPanel = new JPanel();
+        movieListPanel.setLayout(new BoxLayout(movieListPanel, BoxLayout.Y_AXIS));
+        movieListPanel.setBackground(bgColor);
 
-        // Add movies with different vertical offsets
-        int startY = 20;  // start 20 px from top of panel
-        int verticalSpacing = 150; // spacing between movies
+        // Alternate row colors
+        Color rowColor1 = new Color(234, 224, 213);   // matches background
+        Color rowColor2 = new Color(198, 172, 143);   // updated lighter brown
 
-        addMovieToPanel(moviePanel, "Inception", "2h 28m", "English", "Inception.jpg", startY);
-        addMovieToPanel(moviePanel, "Lokah: Chapter 1", "2h 29m", "Malayalam", "lokah Chapter 1.jpg", startY + verticalSpacing);
-        addMovieToPanel(moviePanel, "Hridayapoorvam", "2h 31m", "Malayalam", "Hridayapoorvam.jpg", startY + 2 * verticalSpacing);
-        addMovieToPanel(moviePanel, "F1: The Movie", "2h 35m", "English", "F1 The Movie.jpg", startY + 3 * verticalSpacing);
+        movieListPanel.add(createMovieRow("Inception", "2h 28m", "English", "Inception.jpg", rowColor1));
+        movieListPanel.add(Box.createVerticalStrut(8));
+        movieListPanel.add(createMovieRow("Lokah: Chapter 1", "2h 29m", "Malayalam", "lokah Chapter 1.jpg", rowColor2));
+        movieListPanel.add(Box.createVerticalStrut(8));
+        movieListPanel.add(createMovieRow("Hridayapoorvam", "2h 31m", "Malayalam", "Hridayapoorvam.jpg", rowColor1));
+        movieListPanel.add(Box.createVerticalStrut(8));
+        movieListPanel.add(createMovieRow("F1: The Movie", "2h 35m", "English", "F1 The Movie.jpg", rowColor2));
+
+        // Container with margin
+        JPanel container = new JPanel(new BorderLayout());
+        container.setBackground(bgColor);
+        container.setBorder(BorderFactory.createEmptyBorder(40, 100, 20, 100));
+        container.add(movieListPanel, BorderLayout.CENTER);
+
+        frame.add(container, BorderLayout.CENTER);
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    public static void addMovieToPanel(JPanel panel, String title, String duration, String language, String imagePath, int yOffset) {
+    private static JPanel createMovieRow(String title, String duration, String language, String imagePath, Color bgColor) {
+        JPanel rowPanel = new JPanel(new BorderLayout(20, 0));
+        rowPanel.setBackground(bgColor);
+        rowPanel.setPreferredSize(new Dimension(880, 140));   // width & height
+        rowPanel.setMaximumSize(new Dimension(880, 140));
+        rowPanel.setBorder(BorderFactory.createLineBorder(new Color(34, 51, 59), 2));
+
+        // Poster
         JLabel posterLabel = new JLabel();
         try {
             ImageIcon icon = new ImageIcon(imagePath);
-            Image scaled = icon.getImage().getScaledInstance(90, 110, Image.SCALE_SMOOTH);
+            Image scaled = icon.getImage().getScaledInstance(90, 120, Image.SCALE_SMOOTH);
             posterLabel.setIcon(new ImageIcon(scaled));
         } catch (Exception e) {
             posterLabel.setText("No Image");
         }
-        posterLabel.setBounds(20, yOffset-20, 120, 160);
-        panel.add(posterLabel);
+        posterLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        rowPanel.add(posterLabel, BorderLayout.WEST);
 
-        JLabel infoLabel = new JLabel(title + "    Duration: " + duration + "    Language: " + language);
-        infoLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        infoLabel.setBounds(160, yOffset, 800, 30); // Slightly lower than poster top
-        panel.add(infoLabel);
+        // Details
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setBackground(bgColor);
 
-        int buttonsY = yOffset + 40; // below poster
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JLabel durationLabel = new JLabel("Duration: " + duration);
+        durationLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        JLabel languageLabel = new JLabel("Language: " + language);
+        languageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        detailsPanel.add(titleLabel);
+        detailsPanel.add(Box.createVerticalStrut(3));
+        detailsPanel.add(durationLabel);
+        detailsPanel.add(Box.createVerticalStrut(3));
+        detailsPanel.add(languageLabel);
+
+        rowPanel.add(detailsPanel, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 40));
+        buttonPanel.setBackground(bgColor);
+
         String[] times = {"9:25 am", "1:00 pm", "4:00 pm", "11:47 pm"};
-        int x = 160;
         for (String time : times) {
             JButton timeButton = new JButton(time);
-            timeButton.setBounds(x, buttonsY, 100, 40);
-            timeButton.setBackground(new Color(31, 47, 48));
+            timeButton.setPreferredSize(new Dimension(95, 35));
+            timeButton.setBackground(new Color(34, 51, 59));
             timeButton.setForeground(Color.WHITE);
-            timeButton.setFont(new Font("Arial", Font.BOLD, 14));
+            timeButton.setFont(new Font("Arial", Font.BOLD, 13));
             timeButton.setFocusPainted(false);
-            panel.add(timeButton);
-            x += 130;
+            buttonPanel.add(timeButton);
         }
+
+        rowPanel.add(buttonPanel, BorderLayout.EAST);
+
+        return rowPanel;
     }
 }
-        
-
-
-
-
-
