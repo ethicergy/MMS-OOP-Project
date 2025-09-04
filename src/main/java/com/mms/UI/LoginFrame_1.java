@@ -4,8 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class LoginFrame extends JFrame {
-    public LoginFrame() {
+public class LoginFrame_1 extends JFrame {
+    public LoginFrame_1() {
         setLayout(new GridBagLayout()); // centers loginBox
         setTitle("Login");
         setSize(1920, 1080);
@@ -92,7 +92,7 @@ public class LoginFrame extends JFrame {
         // Add click event (just an example)
         registerLabel.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(LoginFrame.this, "Open registration form here.");
+                JOptionPane.showMessageDialog(LoginFrame_1.this, "Open registration form here.");
             }
         });
 
@@ -101,6 +101,6 @@ public class LoginFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-       new LoginFrame(); 
+       new LoginFrame_1(); 
     }
 }

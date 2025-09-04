@@ -10,9 +10,9 @@ import java.util.List;
 /**
  * SeatSelection — exact layout requested
  */
-public class SeatSelection extends JFrame {
+public class SeatSelection_4 extends JFrame {
 
-    public SeatSelection() {
+    public SeatSelection_4() {
         super("Seat Selection");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(new Color(234, 224, 213));
@@ -381,6 +381,6 @@ public class SeatSelection extends JFrame {
 
     // -------------------- main --------------------
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SeatSelection::new);
+        SwingUtilities.invokeLater(SeatSelection_4::new);
     }
 }

@@ -3,7 +3,7 @@ package com.mms.UI;
 import javax.swing.*;
 import java.awt.*;
 
-public class MovieSelection {
+public class MovieSelection_3 {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("NOW SHOWING: Book Your Movie");

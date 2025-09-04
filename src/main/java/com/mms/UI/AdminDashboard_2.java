@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 
-public class AdminDashboard {
+public class AdminDashboard_2 {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Admin Dashboard");
@@ -95,11 +95,11 @@ public class AdminDashboard {
         JButton addMovieBtn = new JButton("Add Movie");
         JButton addShowtimeBtn = new JButton("Add Showtime");
 
-        addMovieBtn.setFont(new Font("SansSerif", Font.BOLD, 24));
+        addMovieBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
         addMovieBtn.setBackground(new Color(34, 51, 59));
         addMovieBtn.setForeground(Color.WHITE);
 
-        addShowtimeBtn.setFont(new Font("SansSerif", Font.BOLD, 24));
+        addShowtimeBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
         addShowtimeBtn.setBackground(new Color(34, 51, 59));
         addShowtimeBtn.setForeground(Color.WHITE);
 
