@@ -7,6 +7,8 @@ Movie Ticket Booking System - Using Java - Swing & a SQL Database (JDBC)
 
 <img width="1919" height="1019" alt="Screenshot 2025-09-04 090934" src="https://github.com/user-attachments/assets/418b19fb-4ae1-40af-b58e-05dac0e5cf46" />
 
-<img width="1919" height="1018" alt="Screenshot 2025-09-04 090952" src="https://github.com/user-attachments/assets/d9e738b4-6cdd-4dc9-b56d-1ed0d717fd4a" />
+<img width="1919" height="1017" alt="Screenshot 2025-09-04 234033" src="https://github.com/user-attachments/assets/6612269a-6178-4244-9a91-314e9c081c58" />
 
-<img width="1919" height="1017" alt="Screenshot 2025-09-04 091006" src="https://github.com/user-attachments/assets/74e46818-4d21-4595-b470-3d0fe3512fa5" />
+<img width="1919" height="1019" alt="Screenshot 2025-09-04 234050" src="https://github.com/user-attachments/assets/cb344c50-38bd-45e7-af48-ee7a3c35186d" />
+
+<img width="1919" height="1018" alt="Screenshot 2025-09-04 234106" src="https://github.com/user-attachments/assets/c88e6b20-bf9d-4788-afae-0cc24abeed37" />
