@@ -3,13 +3,13 @@ package com.mms.UI;
 import javax.swing.*;
 import java.awt.*;
 
-public class TicketBooking {
+public class MovieSelection {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("NOW SHOWING: Book Your Movie");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1920, 1080);
-
+        frame. setIconImage(new ImageIcon("title-logo.png").getImage());
         // Background color
         Color bgColor = new Color(234, 224, 213);
         frame.getContentPane().setBackground(bgColor);
@@ -18,7 +18,7 @@ public class TicketBooking {
         // Title
         JLabel titleLabel = new JLabel("NOW SHOWING: Book Your Movie", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0)); // spacing below title
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 20, 0)); // spacing below title
         frame.add(titleLabel, BorderLayout.NORTH);
 
         // Movie list panel
@@ -75,17 +75,18 @@ public class TicketBooking {
         detailsPanel.setBackground(bgColor);
 
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         JLabel durationLabel = new JLabel("Duration: " + duration);
-        durationLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        durationLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         JLabel languageLabel = new JLabel("Language: " + language);
-        languageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-
+        languageLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        
         detailsPanel.add(titleLabel);
-        detailsPanel.add(Box.createVerticalStrut(3));
+        detailsPanel.add(Box.createVerticalStrut(6));
         detailsPanel.add(durationLabel);
-        detailsPanel.add(Box.createVerticalStrut(3));
+        detailsPanel.add(Box.createVerticalStrut(6));
         detailsPanel.add(languageLabel);
+        detailsPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         rowPanel.add(detailsPanel, BorderLayout.CENTER);
 

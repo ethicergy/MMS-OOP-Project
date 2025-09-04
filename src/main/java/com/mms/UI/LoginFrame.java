@@ -13,6 +13,7 @@ public class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         setIconImage(new ImageIcon("title-logo.png").getImage());
         getContentPane().setBackground(new Color(234, 224, 213));
+        setVisible(true);
 
         // Login box
         JPanel loginBox = new JPanel(new BorderLayout());
@@ -100,6 +101,6 @@ public class LoginFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
+       new LoginFrame(); 
     }
 }

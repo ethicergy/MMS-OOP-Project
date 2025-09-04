@@ -12,6 +12,7 @@ public class AdminDashboard {
         frame.setSize(1920,1080);
         frame.getContentPane().setBackground(new Color(235, 224, 213));
         frame.setLayout(new BorderLayout(10, 20));
+        frame.setIconImage(new ImageIcon("title-logo.png").getImage());
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
