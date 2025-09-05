@@ -5,6 +5,10 @@ import com.mms.dao.UserDAO;
 import com.mms.dao.MovieDAO;
 import com.mms.models.User;
 import com.mms.models.Movie;
+import com.mms.UI.LoginFrame_1;   
+import javax.swing.SwingUtilities;
+
+
 
 import java.util.List;
 
@@ -64,6 +68,8 @@ public class Main {
             System.out.println(" - " + m);
         }
 
-        // 6. Delete Movie (ID = 1 for test)
+        SwingUtilities.invokeLater(() -> {
+            new LoginFrame_1().setVisible(true);
+        });
        }
 }
