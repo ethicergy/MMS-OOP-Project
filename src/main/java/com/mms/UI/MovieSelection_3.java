@@ -5,11 +5,12 @@ import java.awt.*;
 
 public class MovieSelection_3 {
 
-    public static void main(String[] args) {
+    public MovieSelection_3() {
         JFrame frame = new JFrame("NOW SHOWING: Book Your Movie");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1920, 1080);
-        frame. setIconImage(new ImageIcon("title-logo.png").getImage());
+        frame.setIconImage(new ImageIcon("title-logo.png").getImage());
+
         // Background color
         Color bgColor = new Color(234, 224, 213);
         frame.getContentPane().setBackground(bgColor);
@@ -80,7 +81,7 @@ public class MovieSelection_3 {
         durationLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         JLabel languageLabel = new JLabel("Language: " + language);
         languageLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        
+
         detailsPanel.add(titleLabel);
         detailsPanel.add(Box.createVerticalStrut(6));
         detailsPanel.add(durationLabel);
@@ -108,5 +109,10 @@ public class MovieSelection_3 {
         rowPanel.add(buttonPanel, BorderLayout.EAST);
 
         return rowPanel;
+    }
+
+    // Main method only invokes constructor
+    public static void main(String[] args) {
+        new MovieSelection_3();
     }
 }
