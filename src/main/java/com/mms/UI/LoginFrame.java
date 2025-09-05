@@ -2,6 +2,8 @@ package com.mms.UI;
 
 import java.awt.*;
 import javax.swing.*;
+import com.mms.dao.UserDAO;
+import com.mms.models.User;
 
 public class LoginFrame extends JFrame {
     public LoginFrame() {
@@ -71,6 +73,20 @@ public class LoginFrame extends JFrame {
         loginButton.setBackground(new Color(33, 182, 168));
         loginButton.setForeground(Color.white);
         loginButton.setFocusPainted(false);
+
+        // Add authentication logic on button click
+        loginButton.addActionListener(e -> {
+            String email = userField.getText();
+            String password = new String(passField.getPassword());
+            UserDAO userDAO = new UserDAO();
+            User user = userDAO.authenticateUser(email, password);
+            if (user != null) {
+                JOptionPane.showMessageDialog(this, "Login successful! Welcome, " + user.getName() + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
+                // TODO: Proceed to next screen or main app window
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid email or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;

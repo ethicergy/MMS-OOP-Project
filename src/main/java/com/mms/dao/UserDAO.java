@@ -120,4 +120,27 @@ public class UserDAO {
 		}
 		return false;
 		}
+	
+	public User authenticateUser(String email, String password) {
+		String sql = "select * from users where email = ? and password = ?";
+		try (DBManager db = new DBManager();
+			 Connection conn = db.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, email);
+			stmt.setString(2, password);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				User user = new User();
+				user.setUserId(rs.getInt("user_id"));
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setPassword(rs.getString("password"));
+				user.setRole(rs.getString("role"));
+				return user;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
