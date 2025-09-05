@@ -1,0 +1,386 @@
+package com.mms.UI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * SeatSelection — exact layout requested
+ */
+public class SeatSelection_4 extends JFrame {
+
+    public SeatSelection_4() {
+        super("Seat Selection");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        getContentPane().setBackground(new Color(234, 224, 213));
+        setLayout(new BorderLayout());
+        setIconImage(new ImageIcon("title-logo.png").getImage());
+
+        // Heading
+        JLabel heading = new JLabel("Inception - 1:00 pm | Screen 1", SwingConstants.LEFT);
+        heading.setFont(new Font("Arial", Font.BOLD, 24));
+        heading.setForeground(new Color(10, 9, 8));
+        heading.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 0));
+        add(heading, BorderLayout.NORTH);
+
+        // Design base width (columns total = 16 across blocks)
+        int baseWidth = 1000;
+
+        // Create scalable panel (it computes its own design height based on block sizes)
+        ScalableSeatPanel scalable = new ScalableSeatPanel(baseWidth);
+        scalable.setBackground(new Color(234, 224, 213));
+
+        // Wrapper for seat block — lock width to 1000 and height to at least 800 (or computed)
+        JPanel centerWrapper = new JPanel(new BorderLayout());
+        centerWrapper.setBackground(new Color(234, 224, 213));
+        int computedHeight = scalable.getDesignHeight();
+        int panelWidth = baseWidth;
+        int panelHeight = Math.max(800, computedHeight + 40); // ensure at least 800 high
+        centerWrapper.setPreferredSize(new Dimension(panelWidth, panelHeight));
+
+        // Add seat canvas centered inside the wrapper
+        centerWrapper.add(scalable, BorderLayout.CENTER);
+        add(centerWrapper, BorderLayout.CENTER);
+
+        // Bottom: legend + confirm button
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(new Color(234, 224, 213));
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 18, 16));
+
+        JPanel legendAndButton = new JPanel(new BorderLayout());
+        legendAndButton.setBackground(new Color(234, 224, 213));
+
+        JPanel legend = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 8));
+        legend.setBackground(new Color(234, 224, 213));
+        legend.add(makeLegendBox(new Color(220, 53, 69), "Unavailable"));
+        legend.add(makeLegendBox(new Color(255, 193, 7), "Selected"));
+        legend.add(makeLegendBox(new Color(40, 167, 69), "Available"));
+
+        JButton confirm = new JButton("Select seats");
+        confirm.setFont(new Font("Arial", Font.BOLD, 16));
+        confirm.setPreferredSize(new Dimension(180, 50));
+        confirm.setBackground(new Color(20, 30, 40));
+        confirm.setForeground(Color.WHITE);
+        confirm.setFocusPainted(false);
+        confirm.addActionListener(e -> {
+            List<String> sel = scalable.getSelectedSeatLabels();
+            if (sel.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No seats selected.", "Selection", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Selected seats: " + String.join(", ", sel),
+                        "Selection",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        legendAndButton.add(legend, BorderLayout.WEST);
+        legendAndButton.add(confirm, BorderLayout.EAST);
+
+        bottomPanel.add(legendAndButton, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        pack();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setVisible(true);
+    }
+
+    private JPanel makeLegendBox(Color color, String label) {
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        p.setBackground(new Color(234, 224, 213));
+        JPanel box = new JPanel();
+        box.setBackground(color);
+        box.setPreferredSize(new Dimension(20, 20));
+        JLabel l = new JLabel(" - " + label);
+        l.setFont(new Font("Arial", Font.PLAIN, 14));
+        p.add(box);
+        p.add(l);
+        return p;
+    }
+
+    // -------------------- ScalableSeatPanel --------------------
+    static class ScalableSeatPanel extends JPanel {
+        private final int baseW;
+        private int baseH; // computed based on layout
+
+        // visual constants
+        private final int seatSize = 40;
+        private final int seatGap = 10;
+        private final int blockGap = 50;
+        private final int topMargin = 40;
+        private final int rowGap = 40;
+        private final int bottomPadding = 50; // space below lower blocks for screen bar
+
+        private final List<Seat> seats = new ArrayList<>();
+
+        enum SeatState { AVAILABLE, SELECTED, BOOKED }
+
+        static class Seat {
+            Rectangle bounds;
+            String label;
+            SeatState state;
+            Seat(Rectangle r, String label, SeatState s) { this.bounds = r; this.label = label; this.state = s; }
+        }
+
+        ScalableSeatPanel(int baseWidth) {
+            this.baseW = baseWidth;
+            // build seats and compute baseH internally
+            buildLayoutAndSeats();
+            // clicks: map panel point -> design coords, toggle selection
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    Point p = toDesignCoords(e.getPoint());
+                    if (p == null) return;
+                    for (Seat s : seats) {
+                        if (s.bounds.contains(p)) {
+                            if (s.state == SeatState.BOOKED) {
+                                // ignore booked seats
+                            } else if (s.state == SeatState.AVAILABLE) {
+                                s.state = SeatState.SELECTED;
+                            } else if (s.state == SeatState.SELECTED) {
+                                s.state = SeatState.AVAILABLE;
+                            }
+                            repaint();
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Public accessor so outer class can size wrapper to at least design height.
+         */
+        int getDesignHeight() {
+            return baseH;
+        }
+
+        private Point toDesignCoords(Point panelPoint) {
+            double scale = Math.min(getWidth() / (double) baseW, getHeight() / (double) baseH);
+            double scaledW = baseW * scale;
+            double scaledH = baseH * scale;
+            double tx = (getWidth() - scaledW) / 2.0;
+            double ty = (getHeight() - scaledH) / 2.0;
+            double dx = (panelPoint.x - tx) / scale;
+            double dy = (panelPoint.y - ty) / scale;
+            if (dx < 0 || dy < 0 || dx > baseW || dy > baseH) return null;
+            return new Point((int) dx, (int) dy);
+        }
+
+        /**
+         * Build seat blocks to match requested layout:
+         * Top: 1x16
+         * Middle row of blocks: left 5x7, center 6x7, right 5x6  (total 16 columns)
+         * Lower row of blocks: left 5x4, center 6x4, right 5x4 (total 16 columns)
+         *
+         * Seats are labeled rowChar + seatNumberAcross (1..16 across)
+         */
+        private void buildLayoutAndSeats() {
+            seats.clear();
+
+            // Top
+            int topCols = 16;
+            int topRows = 1;
+            int topBlockW = topCols * seatSize + (topCols - 1) * seatGap;
+            int topBlockH = topRows * seatSize;
+
+            int topX = (baseW - topBlockW) / 2;
+            int topY = topMargin;
+
+            for (int c = 0; c < topCols; c++) {
+                String label = "A" + (c + 1);
+                int x = topX + c * (seatSize + seatGap);
+                int y = topY;
+                seats.add(new Seat(new Rectangle(x, y, seatSize, seatSize), label, SeatState.AVAILABLE));
+            }
+
+            // Middle (upper) blocks: left 5x7, center 6x7, right 5x6
+            int leftMidCols = 5, leftMidRows = 7;
+            int centerMidCols = 6, centerMidRows = 7;
+            int rightMidCols = 5, rightMidRows = 6;
+
+            int midLeftW = leftMidCols * seatSize + (leftMidCols - 1) * seatGap;
+            int midCenterW = centerMidCols * seatSize + (centerMidCols - 1) * seatGap;
+            int midRightW = rightMidCols * seatSize + (rightMidCols - 1) * seatGap;
+
+            int totalMidW = midLeftW + midCenterW + midRightW + 2 * blockGap; // 3 blocks + gaps
+            int midStartX = (baseW - totalMidW) / 2;
+            int midY = topY + topBlockH + rowGap;
+
+            // For numbering across (1..16)
+            int[] midBlockCols = new int[] { leftMidCols, centerMidCols, rightMidCols };
+            int[] midBlockRows = new int[] { leftMidRows, centerMidRows, rightMidRows };
+            int midColsTotal = leftMidCols + centerMidCols + rightMidCols; // 16
+
+            // compute max mid rows for vertical spacing
+            int midRowsMax = Math.max(Math.max(leftMidRows, centerMidRows), rightMidRows);
+            int midBlockW = midLeftW; // not used; we'll compute each blockX
+
+            // Build middle seats row by row (rows aligned at top)
+            for (int r = 0; r < midRowsMax; r++) {
+                char rowChar = (char) ('B' + r); // after top 'A'
+                int blockX = midStartX;
+                int cumulativeIndex = 0;
+                // left block
+                for (int b = 0; b < 3; b++) {
+                    int cols = midBlockCols[b];
+                    int rows = midBlockRows[b];
+                    int blockWidth = cols * seatSize + (cols - 1) * seatGap;
+                    if (r < rows) {
+                        for (int c = 0; c < cols; c++) {
+                            int seatNumberAcross = cumulativeIndex + c + 1;
+                            String label = String.valueOf(rowChar) + seatNumberAcross;
+                            int x = blockX + c * (seatSize + seatGap);
+                            int y = midY + r * (seatSize + seatGap);
+                            seats.add(new Seat(new Rectangle(x, y, seatSize, seatSize), label, SeatState.AVAILABLE));
+                        }
+                    }
+                    cumulativeIndex += cols;
+                    blockX += blockWidth + blockGap;
+                }
+            }
+
+            // Lower (bottom) blocks: left 5x4, center 6x4, right 5x4
+            int leftBotCols = 5, leftBotRows = 4;
+            int centerBotCols = 6, centerBotRows = 4;
+            int rightBotCols = 5, rightBotRows = 4;
+
+            int botLeftW = leftBotCols * seatSize + (leftBotCols - 1) * seatGap;
+            int botCenterW = centerBotCols * seatSize + (centerBotCols - 1) * seatGap;
+            int botRightW = rightBotCols * seatSize + (rightBotCols - 1) * seatGap;
+
+            int totalBotW = botLeftW + botCenterW + botRightW + 2 * blockGap;
+            int botStartX = (baseW - totalBotW) / 2;
+
+            // position lower blocks under middle blocks (use midRowsMax height to space)
+            int midBlocksHeight = midRowsMax * seatSize + (midRowsMax - 1) * seatGap;
+            int botY = midY + midBlocksHeight + rowGap;
+
+            int[] botBlockCols = new int[] { leftBotCols, centerBotCols, rightBotCols };
+            int[] botBlockRows = new int[] { leftBotRows, centerBotRows, rightBotRows };
+
+            int botRowsMax = Math.max(Math.max(leftBotRows, centerBotRows), rightBotRows);
+
+            for (int r = 0; r < botRowsMax; r++) {
+                char rowChar = (char) ('B' + midRowsMax + r); // continue row letters after middle rows
+                int blockX = botStartX;
+                int cumulativeIndex = 0;
+                for (int b = 0; b < 3; b++) {
+                    int cols = botBlockCols[b];
+                    int rows = botBlockRows[b];
+                    int blockWidth = cols * seatSize + (cols - 1) * seatGap;
+                    if (r < rows) {
+                        for (int c = 0; c < cols; c++) {
+                            int seatNumberAcross = cumulativeIndex + c + 1;
+                            String label = String.valueOf(rowChar) + seatNumberAcross;
+                            int x = blockX + c * (seatSize + seatGap);
+                            int y = botY + r * (seatSize + seatGap);
+                            seats.add(new Seat(new Rectangle(x, y, seatSize, seatSize), label, SeatState.AVAILABLE));
+                        }
+                    }
+                    cumulativeIndex += cols;
+                    blockX += blockWidth + blockGap;
+                }
+            }
+
+            // compute baseH from layout so paintComponent can scale correctly
+            int midH = midRowsMax * seatSize + (midRowsMax - 1) * seatGap;
+            int botH = botRowsMax * seatSize + (botRowsMax - 1) * seatGap;
+            baseH = topMargin + topBlockH + rowGap + midH + rowGap + botH + bottomPadding;
+            // Optionally mark some seats as booked (example labels)
+            markBooked("C3", "C4", "D3", "D4", "F2", "F5", "H1", "H6");
+        }
+
+        private void markBooked(String... labels) {
+            for (String lbl : labels) {
+                for (Seat s : seats) {
+                    if (s.label.equals(lbl)) {
+                        s.state = SeatState.BOOKED;
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            double scale = Math.min(getWidth() / (double) baseW, getHeight() / (double) baseH);
+            double scaledW = baseW * scale;
+            double scaledH = baseH * scale;
+            double tx = (getWidth() - scaledW) / 2.0;
+            double ty = (getHeight() - scaledH) / 2.0;
+
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // translate + scale to design coords
+            g2.translate(tx, ty);
+            g2.scale(scale, scale);
+
+            // background canvas (seat area)
+            g2.setColor(new Color(198, 172, 143));
+            g2.fillRect(0, 0, baseW, baseH);
+
+            // draw seats
+            for (Seat s : seats) {
+                Color fill;
+                switch (s.state) {
+                    case BOOKED: fill = new Color(220, 53, 69); break;
+                    case SELECTED: fill = new Color(255, 193, 7); break;
+                    default: fill = new Color(40, 167, 69);
+                }
+                RoundRectangle2D rr = new RoundRectangle2D.Double(s.bounds.x, s.bounds.y, s.bounds.width, s.bounds.height, 8, 8);
+                g2.setColor(fill);
+                g2.fill(rr);
+                g2.setColor(Color.DARK_GRAY);
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.draw(rr);
+
+                // optional label inside seat
+                g2.setFont(new Font("Arial", Font.BOLD, 12));
+                FontMetrics fm = g2.getFontMetrics();
+                int strW = fm.stringWidth(s.label);
+                int strH = fm.getAscent();
+                int sx = s.bounds.x + (s.bounds.width - strW) / 2;
+                int sy = s.bounds.y + (s.bounds.height + strH) / 2 - 2;
+                g2.setColor(Color.BLACK);
+                g2.drawString(s.label, sx, sy);
+            }
+
+            // draw screen bar near bottom of seat area
+            int screenW = baseW / 3;
+            int screenH = 28;
+            int screenX = (baseW - screenW) / 2;
+            int screenY = baseH - 40;
+            g2.setColor(new Color(200, 200, 200));
+            g2.fillRoundRect(screenX, screenY, screenW, screenH, 12, 12);
+            g2.setColor(Color.BLACK);
+            g2.setFont(new Font("Arial", Font.BOLD, 14));
+            String screenText = "Screen this way";
+            FontMetrics fm = g2.getFontMetrics();
+            int sw = fm.stringWidth(screenText);
+            int sh = fm.getAscent();
+            g2.drawString(screenText, screenX + (screenW - sw) / 2, screenY + (screenH + sh) / 2 - 2);
+
+            g2.dispose();
+        }
+
+        List<String> getSelectedSeatLabels() {
+            List<String> out = new ArrayList<>();
+            for (Seat s : seats) {
+                if (s.state == SeatState.SELECTED) out.add(s.label);
+            }
+            return out;
+        }
+    }
+
+    // -------------------- main --------------------
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(SeatSelection_4::new);
+    }
+}
