@@ -3,7 +3,7 @@ package com.mms;
 import com.mms.db.DBManager;
 import com.mms.dao.UserDAO;
 import com.mms.models.User;
-import com.mms.UI.LoginFrame;   // explicitly import LoginFrame
+import com.mms.UI.LoginFrame_1;   // explicitly import LoginFrame
 import javax.swing.SwingUtilities;
 
 public class Main {
