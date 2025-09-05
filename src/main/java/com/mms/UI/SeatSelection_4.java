@@ -381,6 +381,6 @@ public class SeatSelection_4 extends JFrame {
 
     // -------------------- main --------------------
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SeatSelection_4::new);
+        new SeatSelection_4(); 
     }
 }

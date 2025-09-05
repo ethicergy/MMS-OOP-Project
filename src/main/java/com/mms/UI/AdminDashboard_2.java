@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class AdminDashboard_2 {
 
-    public static void main(String[] args) {
+    public AdminDashboard_2() {
         JFrame frame = new JFrame("Admin Dashboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1920,1080);
@@ -115,6 +115,10 @@ public class AdminDashboard_2 {
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new AdminDashboard_2();
     }
 
     // Renderer
