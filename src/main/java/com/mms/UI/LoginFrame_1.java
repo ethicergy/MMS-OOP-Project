@@ -5,6 +5,9 @@ import java.awt.event.*;
 import javax.swing.*;
 import com.mms.dao.UserDAO;
 import com.mms.models.User;
+//import com.mms.UI.AdminDashboard_2;
+import com.mms.UI.MovieSelection_3;
+import com.mms.UI.AdminDashboard_2;
 
 public class LoginFrame_1 extends JFrame {
     public LoginFrame_1() {
@@ -87,6 +90,13 @@ public class LoginFrame_1 extends JFrame {
             User user = userDAO.authenticateUser(username, password);
             if (user != null) {
                 JOptionPane.showMessageDialog(LoginFrame_1.this, "Login successful! Welcome, " + user.getName() + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
+                // Must route to the correct dashboard based on role
+                if (user.getRole().equals("admin")) {
+                    new AdminDashboard_2().setVisible(true);
+                } else {
+                    new MovieSelection_3().setVisible(true);
+                }
+                dispose();
             } else {
                 JOptionPane.showMessageDialog(LoginFrame_1.this, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
             }

@@ -4,15 +4,15 @@ import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 
-public class AdminDashboard_2 {
+public class AdminDashboard_2 extends JFrame {
 
     public AdminDashboard_2() {
-        JFrame frame = new JFrame("Admin Dashboard");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1920,1080);
-        frame.getContentPane().setBackground(new Color(235, 224, 213));
-        frame.setLayout(new BorderLayout(10, 20));
-        frame.setIconImage(new ImageIcon("title-logo.png").getImage());
+        setTitle("Admin Dashboard");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1920, 1080);
+        getContentPane().setBackground(new Color(235, 224, 213));
+        setLayout(new BorderLayout(10, 20));
+        setIconImage(new ImageIcon("title-logo.png").getImage());
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -112,9 +112,9 @@ public class AdminDashboard_2 {
         mainPanel.add(Box.createVerticalStrut(25));
         mainPanel.add(buttonPanel);
 
-        frame.add(mainPanel, BorderLayout.CENTER);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        add(mainPanel, BorderLayout.CENTER);
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
     public static void main(String[] args) {

@@ -2,25 +2,31 @@ package com.mms.UI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+import com.mms.dao.MovieDAO;
+import com.mms.models.Movie;
 
-public class MovieSelection_3 {
+public class MovieSelection_3 extends JFrame {
 
     public MovieSelection_3() {
-        JFrame frame = new JFrame("NOW SHOWING: Book Your Movie");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1920, 1080);
-        frame.setIconImage(new ImageIcon("title-logo.png").getImage());
+        setTitle("NOW SHOWING: Book Your Movie");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1920, 1080);
+        setIconImage(new ImageIcon("title-logo.png").getImage());
+
+        MovieDAO movieDAO = new MovieDAO();
+        List<Movie> movies = movieDAO.getAllMovies();
 
         // Background color
         Color bgColor = new Color(234, 224, 213);
-        frame.getContentPane().setBackground(bgColor);
-        frame.setLayout(new BorderLayout());
+        getContentPane().setBackground(bgColor);
+        setLayout(new BorderLayout());
 
         // Title
         JLabel titleLabel = new JLabel("NOW SHOWING: Book Your Movie", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 20, 0)); // spacing below title
-        frame.add(titleLabel, BorderLayout.NORTH);
+        add(titleLabel, BorderLayout.NORTH);
 
         // Movie list panel
         JPanel movieListPanel = new JPanel();
@@ -30,7 +36,19 @@ public class MovieSelection_3 {
         // Alternate row colors
         Color rowColor1 = new Color(234, 224, 213);   // matches background
         Color rowColor2 = new Color(198, 172, 143);   // updated lighter brown
+        // Must dynamically load movies from DB in future
 
+        for (Movie movie : movies) {
+            String title = movie.getTitle();
+            String duration = movie.getDuration() + " mins";
+            String language = movie.getLanguage();
+            String imagePath = movie.getPosterUrl();
+            Color bg = (movies.indexOf(movie) % 2 == 0) ? rowColor1 : rowColor2;
+            movieListPanel.add(createMovieRow(title, duration, language, imagePath, bg));
+            movieListPanel.add(Box.createVerticalStrut(8)); 
+        }
+
+        /*
         movieListPanel.add(createMovieRow("Inception", "2h 28m", "English", "Inception.jpg", rowColor1));
         movieListPanel.add(Box.createVerticalStrut(8));
         movieListPanel.add(createMovieRow("Lokah: Chapter 1", "2h 29m", "Malayalam", "lokah Chapter 1.jpg", rowColor2));
@@ -38,17 +56,17 @@ public class MovieSelection_3 {
         movieListPanel.add(createMovieRow("Hridayapoorvam", "2h 31m", "Malayalam", "Hridayapoorvam.jpg", rowColor1));
         movieListPanel.add(Box.createVerticalStrut(8));
         movieListPanel.add(createMovieRow("F1: The Movie", "2h 35m", "English", "F1 The Movie.jpg", rowColor2));
-
+        */
         // Container with margin
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(bgColor);
         container.setBorder(BorderFactory.createEmptyBorder(40, 100, 20, 100));
         container.add(movieListPanel, BorderLayout.CENTER);
 
-        frame.add(container, BorderLayout.CENTER);
+        add(container, BorderLayout.CENTER);
 
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
     private static JPanel createMovieRow(String title, String duration, String language, String imagePath, Color bgColor) {
