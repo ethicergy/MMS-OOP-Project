@@ -2,6 +2,10 @@ package com.mms.UI;
 
 import javax.swing.*;
 import javax.swing.table.*;
+import java.util.List;
+import com.mms.dao.MovieDAO;
+import com.mms.models.Movie;
+
 import java.awt.*;
 
 public class AdminDashboard_2 extends JFrame {
@@ -13,6 +17,9 @@ public class AdminDashboard_2 extends JFrame {
         getContentPane().setBackground(new Color(235, 224, 213));
         setLayout(new BorderLayout(10, 20));
         setIconImage(new ImageIcon("title-logo.png").getImage());
+
+        MovieDAO movieDAO = new MovieDAO();
+        List<Movie> movies = movieDAO.getAllMovies();
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -32,7 +39,7 @@ public class AdminDashboard_2 extends JFrame {
         mainPanel.add(Box.createVerticalStrut(25));
 
         String[] columns = {"Title", "Duration", "Language", "Actions"};
-        Object[][] data = {
+        /*Object[][] data = {
             {"Inception", "2h 28m", "English", ""},
             {"Lokah: Chapter 1", "2h 29m", "Malayalam", ""},
             {"Hridayapoorvam", "2h 31m", "Malayalam", ""},
@@ -42,7 +49,16 @@ public class AdminDashboard_2 extends JFrame {
             {null, null, null, null},
             {null, null, null, null},
             {null, null, null, null}
-        };
+        };*/
+        Object[][] data = new Object[movies.size()][4];
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);
+            String title = movie.getTitle();
+            String duration = movie.getDuration() + " mins";
+            String language = movie.getLanguage();
+            data[i] = new Object[]{title, duration, language, null};
+        }
+        
 
         JTable table = new JTable(data, columns) {
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
