@@ -70,7 +70,11 @@ public class AddMovieDialog extends JDialog {
             
             dispose();
         } );
+        cancelButton.addActionListener(e ->
+            dispose()
+        );
         setVisible(true);
+        
     }
     public static void main(String[] args) {
         JFrame frame = new JFrame();

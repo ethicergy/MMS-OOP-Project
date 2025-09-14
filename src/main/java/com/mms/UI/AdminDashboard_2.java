@@ -5,6 +5,8 @@ import javax.swing.table.*;
 import java.util.List;
 import com.mms.dao.MovieDAO;
 import com.mms.models.Movie;
+import com.mms.dao.ShowtimeDAO;
+import com.mms.models.Showtime;
 
 import java.awt.*;
 
@@ -89,15 +91,15 @@ public class AdminDashboard_2 extends JFrame {
         addMovieBtn.setForeground(Color.WHITE);
         addMovieBtn.addActionListener(e -> {
             new AddMovieDialog(this);
-            // Refresh the table after adding a movie
-            JTable newTable = loadMovies();
-            scrollPane.setViewportView(newTable);
-            scrollPane.revalidate();
         });
 
         addShowtimeBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
         addShowtimeBtn.setBackground(new Color(34, 51, 59));
         addShowtimeBtn.setForeground(Color.WHITE);
+        addShowtimeBtn.addActionListener(e -> {
+            new AddShowtimeDialog(this);
+            // Refresh the table after adding a showtime if needed
+        });
 
         buttonPanel.add(Box.createHorizontalGlue());
         buttonPanel.add(addMovieBtn);
