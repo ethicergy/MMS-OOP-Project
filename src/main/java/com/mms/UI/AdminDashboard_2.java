@@ -18,8 +18,6 @@ public class AdminDashboard_2 extends JFrame {
         setLayout(new BorderLayout(10, 20));
         setIconImage(new ImageIcon("title-logo.png").getImage());
 
-        MovieDAO movieDAO = new MovieDAO();
-        List<Movie> movies = movieDAO.getAllMovies();
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -50,33 +48,8 @@ public class AdminDashboard_2 extends JFrame {
             {null, null, null, null},
             {null, null, null, null}
         };*/
-        Object[][] data = new Object[movies.size()][4];
-        for (int i = 0; i < movies.size(); i++) {
-            Movie movie = movies.get(i);
-            String title = movie.getTitle();
-            String duration = movie.getDuration() + " mins";
-            String language = movie.getLanguage();
-            data[i] = new Object[]{title, duration, language, null};
-        }
         
-
-        JTable table = new JTable(data, columns) {
-            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                Component c = super.prepareRenderer(renderer, row, column);
-                if (!isRowSelected(row)) {
-                    if (row % 2 == 0) {
-                        c.setBackground(new Color(198, 172, 143));
-                        c.setForeground(Color.white);
-                    } else {
-                        c.setBackground(new Color(234, 224, 213));
-                        c.setForeground(Color.black);
-                    }
-                } else {
-                    c.setBackground(new Color(201, 173, 167));
-                }
-                return c;
-            }
-        };
+        JTable table = loadMovies();
 
         table.setRowHeight(55);
         table.setFont(new Font("Arial", Font.BOLD, 22));
@@ -114,6 +87,13 @@ public class AdminDashboard_2 extends JFrame {
         addMovieBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
         addMovieBtn.setBackground(new Color(34, 51, 59));
         addMovieBtn.setForeground(Color.WHITE);
+        addMovieBtn.addActionListener(e -> {
+            new AddMovieDialog(this);
+            // Refresh the table after adding a movie
+            JTable newTable = loadMovies();
+            scrollPane.setViewportView(newTable);
+            scrollPane.revalidate();
+        });
 
         addShowtimeBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
         addShowtimeBtn.setBackground(new Color(34, 51, 59));
@@ -131,10 +111,6 @@ public class AdminDashboard_2 extends JFrame {
         add(mainPanel, BorderLayout.CENTER);
         setLocationRelativeTo(null);
         setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        new AdminDashboard_2();
     }
 
     // Renderer
@@ -173,6 +149,38 @@ public class AdminDashboard_2 extends JFrame {
         }
     }
 
+    public JTable loadMovies(){
+        MovieDAO movieDAO = new MovieDAO();
+        List<Movie> movies = movieDAO.getAllMovies();
+        String[] columns = {"Title", "Duration", "Language", "Actions"};
+        Object[][] data = new Object[movies.size()][4];
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);
+            String title = movie.getTitle();
+            String duration = movie.getDuration() + " mins";
+            String language = movie.getLanguage();
+            data[i] = new Object[]{title, duration, language, null};
+        }
+        JTable table = new JTable(data, columns) {
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+                if (!isRowSelected(row)) {
+                    if (row % 2 == 0) {
+                        c.setBackground(new Color(198, 172, 143));
+                        c.setForeground(Color.white);
+                    } else {
+                        c.setBackground(new Color(234, 224, 213));
+                        c.setForeground(Color.black);
+                    }
+                } else {
+                    c.setBackground(new Color(201, 173, 167));
+                }
+                return c;
+            }
+        };
+        return table;
+        
+    }
     // Editor
     static class ButtonsEditor extends DefaultCellEditor {
         protected JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
@@ -220,5 +228,8 @@ public class AdminDashboard_2 extends JFrame {
         public Object getCellEditorValue() {
             return null;
         }
+    }
+    public static void main(String[] args) {
+        new AdminDashboard_2();
     }
 }
