@@ -45,5 +45,9 @@ public class Showtime {
 	    public int getScreenNumber() { return screenNumber; }
 	    public void setScreenNumber(int screenNumber) { this.screenNumber = screenNumber; }
 
-	
+	    @Override
+	    public String toString() {
+	        return String.format("Showtime{id=%d, movieId=%d, date=%s, time=%s, screen=%d}", 
+	                showtimeId, movieId, date, time, screenNumber);
+	    }
 }
