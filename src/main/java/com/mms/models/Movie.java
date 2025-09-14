@@ -63,10 +63,9 @@ public class Movie {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
-    //Thanks GPT
-    
-    //toString
-    
-
-	
+    @Override
+    public String toString() {
+        return String.format("Movie{id=%d, title='%s', duration=%d min, genre='%s', language='%s', certificate='%s'}", 
+                movieId, title, duration, genre, language, certificate);
+    }
 }
