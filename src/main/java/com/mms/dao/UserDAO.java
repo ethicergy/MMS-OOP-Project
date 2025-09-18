@@ -121,12 +121,12 @@ public class UserDAO {
 		return false;
 		}
 	
-	public User authenticateUser(String email, String password) {
-		String sql = "select * from users where email = ? and password = ?";
+	public User authenticateUser(String name, String password) {
+		String sql = "select * from users where name = ? and password = ?";
 		try (DBManager db = new DBManager();
 			 Connection conn = db.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setString(1, email);
+			stmt.setString(1, name);
 			stmt.setString(2, password);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {

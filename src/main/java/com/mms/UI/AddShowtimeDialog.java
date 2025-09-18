@@ -1,0 +1,221 @@
+package com.mms.UI;
+
+import javax.swing.*;
+import java.awt.*;
+import com.mms.dao.MovieDAO;
+import com.mms.models.Movie;
+import com.mms.dao.ShowtimeDAO;
+import com.mms.models.Showtime;
+
+
+public class AddShowtimeDialog extends JDialog {
+    public AddShowtimeDialog(JFrame parent) {
+        super(parent, "Add New Showtime", true);
+        setSize(650, 700);
+        setLocationRelativeTo(parent);
+        setResizable(false);
+        getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(234, 224, 213)));
+
+        MovieDAO movieDAO = new MovieDAO();
+        java.util.List<Movie> movies = movieDAO.getAllMovies();
+        JComboBox<Movie> movieComboBox = new JComboBox<>();
+        for (Movie movie : movies) {
+            movieComboBox.addItem(movie);
+        }
+
+        JLabel movieLabel = new JLabel("Select Movie:");
+        JLabel startDateLabel = new JLabel("Start Date:");
+        JLabel endDateLabel = new JLabel("End Date:");
+        JLabel numShowsLabel = new JLabel("Number of Shows per Day:");
+        JLabel screenLabel = new JLabel("Screen Number:");
+
+        JSpinner startDateSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner endDateSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner numShowsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
+        JSpinner screenSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
+
+        JPanel timeFieldsPanel = new JPanel();
+        timeFieldsPanel.setLayout(new BoxLayout(timeFieldsPanel, BoxLayout.Y_AXIS));
+
+        // Dynamic time fields for shows
+        java.util.List<JPanel> timePickers = new java.util.ArrayList<>();
+        java.util.List<JTextField> hourFields = new java.util.ArrayList<>();
+        java.util.List<JTextField> minuteFields = new java.util.ArrayList<>();
+        java.util.List<JComboBox<String>> amPmFields = new java.util.ArrayList<>();
+
+        // Helper to update time pickers
+        Runnable updateTimePickers = () -> {
+            timeFieldsPanel.removeAll();
+            timePickers.clear(); hourFields.clear(); minuteFields.clear(); amPmFields.clear();
+            int numShows = (Integer) numShowsSpinner.getValue();
+            
+            timeFieldsPanel.setLayout(new GridBagLayout());
+            GridBagConstraints timeGbc = new GridBagConstraints();
+            timeGbc.insets = new Insets(5, 5, 5, 5);
+            timeGbc.anchor = GridBagConstraints.WEST;
+            
+            for (int i = 0; i < numShows; i++) {
+                JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+                row.setBorder(BorderFactory.createEtchedBorder());
+                
+                JLabel showLabel = new JLabel("Show " + (i+1) + ":");
+                showLabel.setFont(showLabel.getFont().deriveFont(Font.BOLD));
+                showLabel.setPreferredSize(new Dimension(60, 25));
+                
+                JTextField hourField = new JTextField(3);
+                hourField.setHorizontalAlignment(JTextField.CENTER);
+                JTextField minuteField = new JTextField(3);
+                minuteField.setHorizontalAlignment(JTextField.CENTER);
+                JComboBox<String> amPmField = new JComboBox<>(new String[]{"AM", "PM"});
+                
+                row.add(showLabel);
+                row.add(hourField);
+                row.add(new JLabel(":"));
+                row.add(minuteField);
+                row.add(amPmField);
+                
+                timeGbc.gridx = 0; timeGbc.gridy = i;
+                timeGbc.fill = GridBagConstraints.HORIZONTAL;
+                timeGbc.weightx = 1.0;
+                timeFieldsPanel.add(row, timeGbc);
+                
+                timePickers.add(row);
+                hourFields.add(hourField);
+                minuteFields.add(minuteField);
+                amPmFields.add(amPmField);
+            }
+            timeFieldsPanel.revalidate();
+            timeFieldsPanel.repaint();
+        };
+
+        numShowsSpinner.addChangeListener(e -> updateTimePickers.run());
+        updateTimePickers.run(); // Initial
+
+        JButton addButton = new JButton("Add Showtimes");
+        JButton cancelButton = new JButton("Cancel");
+        
+        // Main panel with proper layout
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        // Form panel with GridBagLayout for better alignment
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        // Row 0: Movie selection
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(movieLabel, gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(movieComboBox, gbc);
+        
+        // Row 1: Start date
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        formPanel.add(startDateLabel, gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(startDateSpinner, gbc);
+        
+        // Row 2: End date
+        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        formPanel.add(endDateLabel, gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(endDateSpinner, gbc);
+        
+        // Row 3: Number of shows
+        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        formPanel.add(numShowsLabel, gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(numShowsSpinner, gbc);
+        
+        // Row 4: Screen number
+        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        formPanel.add(screenLabel, gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(screenSpinner, gbc);
+        
+        // Row 5: Show times label
+        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.NONE;
+        JLabel showTimesLabel = new JLabel("Show Times:");
+        showTimesLabel.setFont(showTimesLabel.getFont().deriveFont(Font.BOLD, 14f));
+        formPanel.add(showTimesLabel, gbc);
+        
+        // Row 6: Time fields panel
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2; 
+        gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0; gbc.weighty = 1.0;
+        JScrollPane timeScrollPane = new JScrollPane(timeFieldsPanel);
+        timeScrollPane.setPreferredSize(new Dimension(500, 200));
+        timeScrollPane.setBorder(BorderFactory.createTitledBorder("Show Times"));
+        formPanel.add(timeScrollPane, gbc);
+        
+        // Button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        addButton.setPreferredSize(new Dimension(120, 35));
+        cancelButton.setPreferredSize(new Dimension(120, 35));
+        buttonPanel.add(addButton);
+        buttonPanel.add(cancelButton);
+        
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        add(mainPanel);
+        pack();
+
+        addButton.addActionListener(e -> {
+            Movie selectedMovie = (Movie) movieComboBox.getSelectedItem();
+            java.util.Date startDate = (java.util.Date) startDateSpinner.getValue();
+            java.util.Date endDate = (java.util.Date) endDateSpinner.getValue();
+            int numShows = (Integer) numShowsSpinner.getValue();
+            int screenNumber = (Integer) screenSpinner.getValue();
+
+            if (selectedMovie == null || startDate == null || endDate == null || numShows < 1) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            java.time.LocalDate startLocalDate = new java.sql.Date(startDate.getTime()).toLocalDate();
+            java.time.LocalDate endLocalDate = new java.sql.Date(endDate.getTime()).toLocalDate();
+            java.util.List<java.time.LocalTime> showTimes = new java.util.ArrayList<>();
+            for (int i = 0; i < numShows; i++) {
+                String hours = hourFields.get(i).getText().trim();
+                String minutes = minuteFields.get(i).getText().trim();
+                String amPm = (String) amPmFields.get(i).getSelectedItem();
+                if (hours.isEmpty() || minutes.isEmpty() || amPm == null) {
+                    JOptionPane.showMessageDialog(this, "Please fill in all show times.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                try {
+                    int hrs = Integer.parseInt(hours);
+                    int mins = Integer.parseInt(minutes);
+                    if (hrs < 1 || hrs > 12 || mins < 0 || mins > 59) {
+                        JOptionPane.showMessageDialog(this, "Invalid time format for show " + (i+1), "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if (amPm.equals("PM") && hrs != 12) hrs += 12;
+                    if (amPm.equals("AM") && hrs == 12) hrs = 0;
+                    showTimes.add(java.time.LocalTime.of(hrs, mins));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter valid numbers for hours and minutes for show " + (i+1), "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+
+            ShowtimeDAO showtimeDAO = new ShowtimeDAO();
+            int count = 0;
+            for (java.time.LocalDate date = startLocalDate; !date.isAfter(endLocalDate); date = date.plusDays(1)) {
+                for (java.time.LocalTime showTime : showTimes) {
+                    Showtime newShowtime = new Showtime(selectedMovie.getMovieId(), date, showTime, screenNumber);
+                    boolean success = showtimeDAO.createShowtime(newShowtime);
+                    if (success) count++;
+                }
+            }
+            JOptionPane.showMessageDialog(this, count + " showtimes added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+        });
+        cancelButton.addActionListener(e -> dispose());
+        setVisible(true);
+    }
+    public static void main(String[] args) {
+        JFrame frame = new JFrame();
+        new AddShowtimeDialog(frame);
+    }
+}
