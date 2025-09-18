@@ -325,10 +325,9 @@ public class Main {
         }
 
         // Depopulate the tables for clean testing
-        DBManager.clearTables();
+        DBManager.clearAndResetTables();
 
         //   Test UserDAO (user)
-        UserDAO userDAO = new UserDAO();
         User newUser = new User("Protagonist", "tenet@gmail.com", "tenet", "user");
         boolean userCreated = userDAO.createUser(newUser);
         System.out.println(userCreated ? "  User created" : "  User creation failed");
@@ -339,7 +338,6 @@ public class Main {
         System.out.println(adminCreated ? "  Admin user created" : "  Admin user creation failed");
 
         //   Now test MovieDAO
-        MovieDAO movieDAO = new MovieDAO();
 
         // 1. Create Movie
         Movie inception = new Movie("Inception", 148, "Sci-Fi", "English", "U/A", "Inception.jpg");
