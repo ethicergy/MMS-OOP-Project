@@ -27,6 +27,15 @@ public class Movie {
 		
 	}
 	
+	public Movie(int movieId, String title, int duration, String genre, String language, String certificate, String posterUrl) {
+		this.movieId = movieId;
+		this.title = title;
+		this.duration = duration;
+		this.genre = genre;
+		this.language = language;
+		this.certificate = certificate;
+		this.posterUrl = posterUrl;		
+	}
 	public Movie(String title, int duration, String genre, String language, String certificate, String posterUrl) {//This one needed when we need to create it, createdAt instance will be auto-assigned do not manage it
 		
 		this.title = title;

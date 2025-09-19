@@ -27,6 +27,46 @@ public class ShowtimeDAO {
 			return false;
 		}
 	}
+
+	public boolean updateShowtimeTime(int showtimeId, java.time.LocalTime newTime) {
+		String sql = "update showtimes set time = ? where showtime_id = ?";
+
+		try(DBManager db = new DBManager();
+				Connection conn = db.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)){
+			stmt.setTime(1, java.sql.Time.valueOf(newTime));
+			stmt.setInt(2, showtimeId);
+			int rows = stmt.executeUpdate();
+			return rows > 0;
+		} catch(SQLException e) {
+			System.err.println("Error updating showtime: "+e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public Showtime getShowtimeByMovieIdAndDateTime(int movieId, java.time.LocalDate date, java.time.LocalTime time) {
+		String sql = "Select * from showtimes where movie_id = ? and date = ? and time = ?";
+		
+		try(DBManager db = new DBManager();
+				Connection conn = db.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)){
+			stmt.setInt(1, movieId);
+			stmt.setDate(2, java.sql.Date.valueOf(date));
+			stmt.setTime(3, java.sql.Time.valueOf(time));
+			try(ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					Showtime s = mapRowtoShowtime(rs);
+					return s;
+					
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error getching showtime: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	public Showtime getShowtimeById(int id) {
 		String sql = "Select * from showtimes where showtime_id = ?";
@@ -130,9 +170,6 @@ public class ShowtimeDAO {
 			return false;
 			
 		}
-	
-	
-	
 	}
 
 }

@@ -88,15 +88,16 @@ public class MovieDAO {
 		return movies;
 	}
 	public boolean updateMovie(Movie movie) {
-		String sql = "update movies set duration = ?, genre = ?, language = ?, certificate = ?, poster_url = ? where movie_id =?";
+		String sql = "update movies set title = ?, duration = ?, genre = ?, language = ?, certificate = ?, poster_url = ? where movie_id =?";
 		try(DBManager db = new DBManager(); Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)){
 			
-			stmt.setInt(1, movie.getDuration());
-	        stmt.setString(2, movie.getGenre());
-	        stmt.setString(3, movie.getLanguage());
-	        stmt.setString(4, movie.getCertificate());
-	        stmt.setString(5, movie.getPosterUrl());
-	        stmt.setInt(6, movie.getMovieId());
+			stmt.setString(1, movie.getTitle());
+			stmt.setInt(2, movie.getDuration());
+	        stmt.setString(3, movie.getGenre());
+	        stmt.setString(4, movie.getLanguage());
+	        stmt.setString(5, movie.getCertificate());
+	        stmt.setString(6, movie.getPosterUrl());
+	        stmt.setInt(7, movie.getMovieId());
 	        
 	        int rows = stmt.executeUpdate();
 	        
