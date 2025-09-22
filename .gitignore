@@ -23,3 +23,11 @@ Thumbs.db
 
 # Logs
 *.log
+
+/target/
+*.class
+*.iml
+.idea/
+.settings/
+.classpath
+.project

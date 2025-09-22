@@ -14,7 +14,9 @@ CREATE TABLE IF NOT EXISTS movies (
     duration INT NOT NULL, -- in minutes
     genre VARCHAR(50) NOT NULL,
     language VARCHAR(50) NOT NULL,
-    certificate VARCHAR(10) NOT NULL
+    certificate VARCHAR(10) NOT NULL,
+    poster_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Showtimes Table

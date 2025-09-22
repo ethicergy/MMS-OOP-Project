@@ -58,6 +58,9 @@ public class User {
 		this.role = role;
 	}
 	
-	//Need to add a tostring method, later
+	@Override
+	public String toString() {
+		return String.format("User{id=%d, name='%s', email='%s', role='%s'}", 
+				userId, name, email, role);
+	}
 }
-	
