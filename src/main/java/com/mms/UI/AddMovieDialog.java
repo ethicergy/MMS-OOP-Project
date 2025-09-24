@@ -7,6 +7,9 @@ import com.mms.dao.ShowtimeDAO;
 import java.util.List;
 import com.mms.models.Movie;
 import com.mms.models.Showtime;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class AddMovieDialog extends JDialog {
     public AddMovieDialog(JFrame parent) {
@@ -23,24 +26,84 @@ public class AddMovieDialog extends JDialog {
         JLabel languageLabel = new JLabel("Language:");
         JTextField languageField = new JTextField(10);
         JLabel certificateLabel = new JLabel("Certificate:");
-        JTextField certificateField = new JTextField(10);        
+        JTextField certificateField = new JTextField(10);
+        JLabel posterLabel = new JLabel("Poster Image:");
+        JTextField posterField = new JTextField(20);
+        posterField.setEditable(false);
+        JButton uploadButton = new JButton("Upload Image");
         JButton addButton = new JButton("Add Movie");
         JButton cancelButton = new JButton("Cancel");
-        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
-        panel.add(titleLabel);
-        panel.add(titleField);
-        panel.add(durationLabel);
-        panel.add(durationField);
-        panel.add(genre);
-        panel.add(genreField);
-        panel.add(languageLabel);
-        panel.add(languageField);
-        panel.add(certificateLabel);
-        panel.add(certificateField);
-        panel.add(addButton);
-        panel.add(cancelButton);
-        add(panel);
-        pack();
+        
+        // File upload functionality
+        uploadButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Image files", "jpg", "jpeg", "png", "gif", "bmp"));
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                try {
+                    // Create images directory if it doesn't exist
+                    File imagesDir = new File("./images");
+                    if (!imagesDir.exists()) {
+                        imagesDir.mkdirs();
+                    }
+                    // Save to images folder
+                    File dest = new File("./images/" + selectedFile.getName());
+                    Files.copy(selectedFile.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    posterField.setText("images/" + selectedFile.getName()); // Save relative path
+                    JOptionPane.showMessageDialog(this, "Image uploaded successfully!");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Failed to upload image: " + ex.getMessage());
+                }
+            }
+        });
+        
+    JPanel panel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(8, 8, 8, 8);
+    gbc.anchor = GridBagConstraints.LINE_END;
+    gbc.gridx = 0; gbc.gridy = 0;
+    panel.add(titleLabel, gbc);
+    gbc.gridy++;
+    panel.add(durationLabel, gbc);
+    gbc.gridy++;
+    panel.add(genre, gbc);
+    gbc.gridy++;
+    panel.add(languageLabel, gbc);
+    gbc.gridy++;
+    panel.add(certificateLabel, gbc);
+    gbc.gridy++;
+    panel.add(posterLabel, gbc);
+
+    gbc.anchor = GridBagConstraints.LINE_START;
+    gbc.gridx = 1; gbc.gridy = 0;
+    panel.add(titleField, gbc);
+    gbc.gridy++;
+    panel.add(durationField, gbc);
+    gbc.gridy++;
+    panel.add(genreField, gbc);
+    gbc.gridy++;
+    panel.add(languageField, gbc);
+    gbc.gridy++;
+    panel.add(certificateField, gbc);
+    gbc.gridy++;
+    JPanel posterPanel = new JPanel(new BorderLayout(5,0));
+    posterPanel.add(posterField, BorderLayout.CENTER);
+    posterPanel.add(uploadButton, BorderLayout.EAST);
+    panel.add(posterPanel, gbc);
+
+    // Button row
+    gbc.gridx = 0; gbc.gridy++;
+    gbc.gridwidth = 2;
+    gbc.anchor = GridBagConstraints.CENTER;
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+    buttonPanel.add(addButton);
+    buttonPanel.add(cancelButton);
+    panel.add(buttonPanel, gbc);
+
+    add(panel);
+    pack();
         addButton.addActionListener(e -> {
             String title = titleField.getText().trim();
             String duration = durationField.getText().trim();
@@ -57,7 +120,8 @@ public class AddMovieDialog extends JDialog {
                     JOptionPane.showMessageDialog(this, "Duration must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 } else {
-                    Movie newMovie = new Movie(title, dur, genre_var, language, certificate, "");
+                    String posterUrl = posterField.getText().trim();
+                    Movie newMovie = new Movie(title, dur, genre_var, language, certificate, posterUrl);
                     MovieDAO movieDAO = new MovieDAO();
                     movieDAO.createMovie(newMovie);
                     JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -83,7 +147,7 @@ public class AddMovieDialog extends JDialog {
     // Constructor for adding movies with callback
     public AddMovieDialog(JFrame parent, Runnable onSaveCallback) {
         super(parent, "Add Movie", true);
-        setSize(400, 300);
+        setSize(500, 500);
         setLocationRelativeTo(parent);
         getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(234, 224, 213)));
         JLabel titleLabel = new JLabel("Movie Title:");
@@ -95,23 +159,83 @@ public class AddMovieDialog extends JDialog {
         JLabel languageLabel = new JLabel("Language:");
         JTextField languageField = new JTextField(10);
         JLabel certificateLabel = new JLabel("Certificate:");
-        JTextField certificateField = new JTextField(10);        
+        JTextField certificateField = new JTextField(10);
+        JLabel posterLabel = new JLabel("Poster Image:");
+        JTextField posterField = new JTextField(20);
+        posterField.setEditable(false);
+        JButton uploadButton = new JButton("Upload Image");
         JButton addButton = new JButton("Add Movie");
         JButton cancelButton = new JButton("Cancel");
-        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
-        panel.add(titleLabel);
-        panel.add(titleField);
-        panel.add(durationLabel);
-        panel.add(durationField);
-        panel.add(genre);
-        panel.add(genreField);
-        panel.add(languageLabel);
-        panel.add(languageField);
-        panel.add(certificateLabel);
-        panel.add(certificateField);
-        panel.add(addButton);
-        panel.add(cancelButton);
-        add(panel);
+        
+        // File upload functionality
+        uploadButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Image files", "jpg", "jpeg", "png", "gif", "bmp"));
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                try {
+                    // Create images directory if it doesn't exist
+                    File imagesDir = new File("./images");
+                    if (!imagesDir.exists()) {
+                        imagesDir.mkdirs();
+                    }
+                    // Save to images folder
+                    File dest = new File("./images/" + selectedFile.getName());
+                    Files.copy(selectedFile.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    posterField.setText("images/" + selectedFile.getName()); // Save relative path
+                    JOptionPane.showMessageDialog(this, "Image uploaded successfully!");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Failed to upload image: " + ex.getMessage());
+                }
+            }
+        });
+        
+    JPanel panel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(8, 8, 8, 8);
+    gbc.anchor = GridBagConstraints.LINE_END;
+    gbc.gridx = 0; gbc.gridy = 0;
+    panel.add(titleLabel, gbc);
+    gbc.gridy++;
+    panel.add(durationLabel, gbc);
+    gbc.gridy++;
+    panel.add(genre, gbc);
+    gbc.gridy++;
+    panel.add(languageLabel, gbc);
+    gbc.gridy++;
+    panel.add(certificateLabel, gbc);
+    gbc.gridy++;
+    panel.add(posterLabel, gbc);
+
+    gbc.anchor = GridBagConstraints.LINE_START;
+    gbc.gridx = 1; gbc.gridy = 0;
+    panel.add(titleField, gbc);
+    gbc.gridy++;
+    panel.add(durationField, gbc);
+    gbc.gridy++;
+    panel.add(genreField, gbc);
+    gbc.gridy++;
+    panel.add(languageField, gbc);
+    gbc.gridy++;
+    panel.add(certificateField, gbc);
+    gbc.gridy++;
+    JPanel posterPanel = new JPanel(new BorderLayout(5,0));
+    posterPanel.add(posterField, BorderLayout.CENTER);
+    posterPanel.add(uploadButton, BorderLayout.EAST);
+    panel.add(posterPanel, gbc);
+
+    // Button row
+    gbc.gridx = 0; gbc.gridy++;
+    gbc.gridwidth = 2;
+    gbc.anchor = GridBagConstraints.CENTER;
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+    buttonPanel.add(addButton);
+    buttonPanel.add(cancelButton);
+    panel.add(buttonPanel, gbc);
+
+    add(panel);
         addButton.setForeground(Color.WHITE);
         addButton.setBackground(new Color(34, 51, 59));
         cancelButton.setForeground(Color.WHITE);
@@ -132,7 +256,8 @@ public class AddMovieDialog extends JDialog {
                     JOptionPane.showMessageDialog(this, "Duration must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 } else {
-                    Movie newMovie = new Movie(title, dur, genre_var, language, certificate, "");
+                    String posterUrl = posterField.getText().trim();
+                    Movie newMovie = new Movie(title, dur, genre_var, language, certificate, posterUrl);
                     MovieDAO movieDAO = new MovieDAO();
                     movieDAO.createMovie(newMovie);
                     JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -174,6 +299,35 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
     JTextField languageField = new JTextField(movie.getLanguage(), 10);
     JLabel certificateLabel = new JLabel("Certificate:");
     JTextField certificateField = new JTextField(movie.getCertificate(), 10);
+    JLabel posterLabel = new JLabel("Poster Image:");
+    JTextField posterField = new JTextField(movie.getPosterUrl(), 20);
+    posterField.setEditable(false);
+    JButton uploadButton = new JButton("Upload Image");
+    
+    // File upload functionality
+    uploadButton.addActionListener(e -> {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Image files", "jpg", "jpeg", "png", "gif", "bmp"));
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                // Create images directory if it doesn't exist
+                File imagesDir = new File("./images");
+                if (!imagesDir.exists()) {
+                    imagesDir.mkdirs();
+                }
+                // Save to images folder
+                File dest = new File("./images/" + selectedFile.getName());
+                Files.copy(selectedFile.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                posterField.setText("images/" + selectedFile.getName()); // Save relative path
+                JOptionPane.showMessageDialog(this, "Image uploaded successfully!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to upload image: " + ex.getMessage());
+            }
+        }
+    });
 
     // Date picker and showtimes
     JLabel dateLabel = new JLabel("Date of shows:");
@@ -260,7 +414,8 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
                 JOptionPane.showMessageDialog(this, "Duration must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            Movie updatedMovie = new Movie(movie.getMovieId(), title, dur, genre_var, language, certificate, movie.getPosterUrl());
+            String posterUrl = posterField.getText().trim();
+            Movie updatedMovie = new Movie(movie.getMovieId(), title, dur, genre_var, language, certificate, posterUrl);
             MovieDAO movieDAO = new MovieDAO();
             movieDAO.updateMovie(updatedMovie); // You need to implement updateMovie in MovieDAO
 
@@ -301,12 +456,14 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
 
     cancelButton.addActionListener(e -> dispose());
 
-    JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+    JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 10));
     formPanel.add(titleLabel); formPanel.add(titleField);
     formPanel.add(durationLabel); formPanel.add(durationField);
     formPanel.add(genreLabel); formPanel.add(genreField);
     formPanel.add(languageLabel); formPanel.add(languageField);
     formPanel.add(certificateLabel); formPanel.add(certificateField);
+    formPanel.add(posterLabel); formPanel.add(posterField);
+    formPanel.add(new JLabel()); formPanel.add(uploadButton);
 
     JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     datePanel.add(dateLabel);

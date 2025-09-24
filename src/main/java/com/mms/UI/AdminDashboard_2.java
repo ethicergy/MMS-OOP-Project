@@ -17,6 +17,7 @@ public class AdminDashboard_2 extends JFrame {
         setLayout(new BorderLayout(10, 20));
         setIconImage(new ImageIcon("title-logo.png").getImage());
 
+        //Logout Button
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -70,14 +71,14 @@ public class AdminDashboard_2 extends JFrame {
         JButton addMovieBtn = new JButton("Add Movie");
         JButton addShowtimeBtn = new JButton("Add Showtime");
 
-        addMovieBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
+        addMovieBtn.setFont(new Font("Arial", Font.BOLD, 18));
         addMovieBtn.setBackground(new Color(34, 51, 59));
         addMovieBtn.setForeground(Color.WHITE);
         addMovieBtn.addActionListener(e -> {
             new AddMovieDialog(this, this::refreshMovieTable);
         });
 
-        addShowtimeBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
+        addShowtimeBtn.setFont(new Font("Arial", Font.BOLD, 18));
         addShowtimeBtn.setBackground(new Color(34, 51, 59));
         addShowtimeBtn.setForeground(Color.WHITE);
         addShowtimeBtn.addActionListener(e -> {
@@ -85,10 +86,21 @@ public class AdminDashboard_2 extends JFrame {
             // Refresh the table after adding a showtime if needed
         });
 
+        JButton logoutBtn = new JButton("Logout");
+        logoutBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        logoutBtn.setBackground(new Color(34, 51, 59));
+        logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame_1();
+        });
+
         buttonPanel.add(Box.createHorizontalGlue());
         buttonPanel.add(addMovieBtn);
         buttonPanel.add(Box.createRigidArea(new Dimension(200, 0)));
         buttonPanel.add(addShowtimeBtn);
+        buttonPanel.add(Box.createRigidArea(new Dimension(200, 0)));
+        buttonPanel.add(logoutBtn);
         buttonPanel.add(Box.createHorizontalGlue());
 
         mainPanel.add(Box.createVerticalStrut(25));
@@ -117,7 +129,7 @@ public class AdminDashboard_2 extends JFrame {
             btn.setFocusPainted(false);
             btn.setBackground(bg);
             btn.setForeground(Color.WHITE);
-            btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+            btn.setFont(new Font("Arial", Font.BOLD, 14));
         }
 
         @Override
@@ -206,7 +218,7 @@ public class AdminDashboard_2 extends JFrame {
             btn.setFocusPainted(false);
             btn.setBackground(bg);
             btn.setForeground(Color.WHITE);
-            btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+            btn.setFont(new Font("Arial", Font.BOLD, 14));
         }
 
         @Override
@@ -287,4 +299,4 @@ public class AdminDashboard_2 extends JFrame {
     public static void main(String[] args) {
         new AdminDashboard_2();
     }
-}
+}    
