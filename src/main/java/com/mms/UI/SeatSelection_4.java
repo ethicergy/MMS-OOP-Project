@@ -6,21 +6,42 @@ import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import com.mms.models.Movie;
+import com.mms.models.Showtime;
+import com.mms.dao.BookingDAO;
+import com.mms.dao.SeatDAO;
 
 /**
  * SeatSelection — exact layout requested
  */
 public class SeatSelection_4 extends JFrame {
+    private Showtime selectedShowtime;
+    private Movie selectedMovie;
+    private BookingDAO bookingDAO;
+    private SeatDAO seatDAO;
 
+    // Default constructor for backward compatibility
     public SeatSelection_4() {
+        this(null, null);
+    }
+
+    public SeatSelection_4(Showtime showtime, Movie movie) {
         super("Seat Selection");
+        this.selectedShowtime = showtime;
+        this.selectedMovie = movie;
+        this.bookingDAO = new BookingDAO();
+        this.seatDAO = new SeatDAO();
+        
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(new Color(234, 224, 213));
         setLayout(new BorderLayout());
         setIconImage(new ImageIcon("title-logo.png").getImage());
 
-        // Heading
-        JLabel heading = new JLabel("Inception - 1:00 pm | Screen 1", SwingConstants.LEFT);
+        // Heading - dynamic based on showtime and movie data
+        String headingText = getHeadingText();
+        JLabel heading = new JLabel(headingText, SwingConstants.LEFT);
         heading.setFont(new Font("Arial", Font.BOLD, 24));
         heading.setForeground(new Color(10, 9, 8));
         heading.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 0));
@@ -30,7 +51,8 @@ public class SeatSelection_4 extends JFrame {
         int baseWidth = 1000;
 
         // Create scalable panel (it computes its own design height based on block sizes)
-        ScalableSeatPanel scalable = new ScalableSeatPanel(baseWidth);
+        int showtimeId = (selectedShowtime != null) ? selectedShowtime.getShowtimeId() : -1;
+        ScalableSeatPanel scalable = new ScalableSeatPanel(baseWidth, showtimeId);
         scalable.setBackground(new Color(234, 224, 213));
 
         // Wrapper for seat block — lock width to 1000 and height to at least 800 (or computed)
@@ -58,6 +80,16 @@ public class SeatSelection_4 extends JFrame {
         legend.add(makeLegendBox(new Color(220, 53, 69), "Unavailable"));
         legend.add(makeLegendBox(new Color(255, 193, 7), "Selected"));
         legend.add(makeLegendBox(new Color(40, 167, 69), "Available"));
+        
+        // Add back button to legend
+        JButton backButton = new JButton("← Back to Movies");
+        backButton.setFont(new Font("Arial", Font.BOLD, 14));
+        backButton.setPreferredSize(new Dimension(160, 40));
+        backButton.setBackground(new Color(108, 117, 125)); // Gray color
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+        backButton.addActionListener(e -> returnToMovieSelection());
+        legend.add(backButton);
 
         JButton confirm = new JButton("Select seats");
         confirm.setFont(new Font("Arial", Font.BOLD, 16));
@@ -65,17 +97,7 @@ public class SeatSelection_4 extends JFrame {
         confirm.setBackground(new Color(20, 30, 40));
         confirm.setForeground(Color.WHITE);
         confirm.setFocusPainted(false);
-        confirm.addActionListener(e -> {
-            List<String> sel = scalable.getSelectedSeatLabels();
-            if (sel.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No seats selected.", "Selection", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Selected seats: " + String.join(", ", sel),
-                        "Selection",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+        confirm.addActionListener(e -> processBooking(scalable));
 
         legendAndButton.add(legend, BorderLayout.WEST);
         legendAndButton.add(confirm, BorderLayout.EAST);
@@ -86,6 +108,141 @@ public class SeatSelection_4 extends JFrame {
         pack();
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
+    }
+
+    private String getHeadingText() {
+        if (selectedShowtime == null || selectedMovie == null) {
+            return "Inception - 1:00 pm | Screen 1"; // Default fallback
+        }
+        
+        String time = formatTimeForDisplay(selectedShowtime.getTime());
+        return selectedMovie.getTitle() + " - " + time + " | Screen " + selectedShowtime.getScreenNumber();
+    }
+    
+    private String formatTimeForDisplay(java.time.LocalTime time) {
+        int hour = time.getHour();
+        int minute = time.getMinute();
+        String amPm = (hour >= 12) ? "pm" : "am";
+        hour = (hour > 12) ? hour - 12 : (hour == 0 ? 12 : hour);
+        
+        return String.format("%d:%02d %s", hour, minute, amPm);
+    }
+    
+    private void processBooking(ScalableSeatPanel seatPanel) {
+        List<String> selectedSeats = seatPanel.getSelectedSeatLabels();
+        
+        if (selectedSeats.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Please select at least one seat to continue.", 
+                "No Seats Selected", 
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
+        // Check if we have all required data
+        if (selectedShowtime == null || selectedMovie == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Booking information is incomplete. Please go back and select a movie.", 
+                "Booking Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Calculate total price (using default price of ₹200 per seat)
+        java.math.BigDecimal pricePerSeat = new java.math.BigDecimal("200.00");
+        java.math.BigDecimal totalPrice = pricePerSeat.multiply(new java.math.BigDecimal(selectedSeats.size()));
+        
+        // Create booking confirmation message
+        String confirmMessage = String.format(
+            "<html><h3>Confirm Your Booking</h3>" +
+            "<b>Movie:</b> %s<br>" +
+            "<b>Date & Time:</b> %s at %s<br>" +
+            "<b>Screen:</b> %d<br>" +
+            "<b>Selected Seats:</b> %s<br>" +
+            "<b>Number of Seats:</b> %d<br>" +
+            "<b>Price per Seat:</b> ₹%.2f<br>" +
+            "<b>Total Amount:</b> ₹%.2f<br><br>" +
+            "Do you want to confirm this booking?</html>",
+            selectedMovie.getTitle(),
+            selectedShowtime.getDate().toString(),
+            formatTimeForDisplay(selectedShowtime.getTime()),
+            selectedShowtime.getScreenNumber(),
+            String.join(", ", selectedSeats),
+            selectedSeats.size(),
+            pricePerSeat,
+            totalPrice
+        );
+        
+        int choice = JOptionPane.showConfirmDialog(this,
+            confirmMessage,
+            "Confirm Booking",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
+            
+        if (choice == JOptionPane.YES_OPTION) {
+            // Process the booking
+            boolean success = createBookingInDatabase(selectedSeats, pricePerSeat);
+            
+            if (success) {
+                JOptionPane.showMessageDialog(this,
+                    "<html><h3>Booking Confirmed!</h3>" +
+                    "Your booking has been successfully created.<br>" +
+                    "Booking Details:<br>" +
+                    "<b>Seats:</b> " + String.join(", ", selectedSeats) + "<br>" +
+                    "<b>Total Amount:</b> ₹" + totalPrice + "<br><br>" +
+                    "Thank you for choosing our cinema!</html>",
+                    "Booking Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+                    
+                // Go back to movie selection
+                returnToMovieSelection();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "<html><h3>Booking Failed</h3>" +
+                    "Sorry, we couldn't complete your booking.<br>" +
+                    "Some seats might have been booked by another customer.<br>" +
+                    "Please refresh and try selecting different seats.</html>",
+                    "Booking Error",
+                    JOptionPane.ERROR_MESSAGE);
+                    
+                // Refresh the seat layout
+                refreshSeatLayout();
+            }
+        }
+    }
+    
+    private boolean createBookingInDatabase(List<String> seatLabels, java.math.BigDecimal pricePerSeat) {
+        try {
+            // For now, use a default user ID (in a real app, this would come from user session)
+            int userId = 1; 
+            
+            return bookingDAO.createBookingsForSeatLabels(
+                selectedShowtime.getShowtimeId(), 
+                seatLabels, 
+                userId, 
+                pricePerSeat
+            );
+        } catch (Exception e) {
+            System.err.println("Error creating booking: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private void refreshSeatLayout() {
+        // Refresh the seat layout by recreating the seat panel
+        // This is a simple approach - in a more complex app you might want to just refresh the data
+        SwingUtilities.invokeLater(() -> {
+            this.dispose();
+            new SeatSelection_4(selectedShowtime, selectedMovie).setVisible(true);
+        });
+    }
+    
+    private void returnToMovieSelection() {
+        SwingUtilities.invokeLater(() -> {
+            this.dispose();
+            new MovieSelection_3().setVisible(true);
+        });
     }
 
     private JPanel makeLegendBox(Color color, String label) {
@@ -102,7 +259,7 @@ public class SeatSelection_4 extends JFrame {
     }
 
     // -------------------- ScalableSeatPanel --------------------
-    static class ScalableSeatPanel extends JPanel {
+    class ScalableSeatPanel extends JPanel {
         private final int baseW;
         private int baseH; // computed based on layout
 
@@ -126,9 +283,19 @@ public class SeatSelection_4 extends JFrame {
         }
 
         ScalableSeatPanel(int baseWidth) {
+            this(baseWidth, -1); // Default constructor calls with no showtime
+        }
+        
+        ScalableSeatPanel(int baseWidth, int showtimeId) {
             this.baseW = baseWidth;
             // build seats and compute baseH internally
             buildLayoutAndSeats();
+            
+            // Load booked seats from database if showtime ID is provided
+            if (showtimeId > 0) {
+                loadBookedSeatsFromDatabase(showtimeId);
+            }
+            
             // clicks: map panel point -> design coords, toggle selection
             addMouseListener(new MouseAdapter() {
                 @Override
@@ -291,8 +458,29 @@ public class SeatSelection_4 extends JFrame {
             int midH = midRowsMax * seatSize + (midRowsMax - 1) * seatGap;
             int botH = botRowsMax * seatSize + (botRowsMax - 1) * seatGap;
             baseH = topMargin + topBlockH + rowGap + midH + rowGap + botH + bottomPadding;
-            // Optionally mark some seats as booked (example labels)
-            markBooked("C3", "C4", "D3", "D4", "F2", "F5", "H1", "H6");
+            // Booked seats will be loaded by loadBookedSeatsFromDatabase() if showtime ID is provided
+            // No hardcoded booked seats needed anymore
+        }
+        
+        private void loadBookedSeatsFromDatabase(int showtimeId) {
+            try {
+                // Ensure seats exist for this showtime
+                seatDAO.ensureSeatsForShowtime(showtimeId);
+                
+                // Load booked seats from database
+                List<String> bookedSeatLabels = bookingDAO.getBookedSeatLabels(showtimeId);
+                
+                // Mark booked seats
+                for (String seatLabel : bookedSeatLabels) {
+                    markBooked(seatLabel);
+                }
+                
+                System.out.println("Loaded " + bookedSeatLabels.size() + " booked seats for showtime " + showtimeId);
+            } catch (Exception e) {
+                System.err.println("Error loading booked seats from database: " + e.getMessage());
+                e.printStackTrace();
+                // Don't fall back to hardcoded seats - just continue with all seats available
+            }
         }
 
         private void markBooked(String... labels) {

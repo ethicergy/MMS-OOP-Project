@@ -1,0 +1,125 @@
+# 📋 PROJECT STATUS REFERENCE - FOR ALL TEAM MEMBERS
+
+**Last Updated**: September 21, 2025  
+**Current Phase**: Individual Task Assignment  
+**Login System Status**: ✅ COMPLETE (except registration)
+
+---
+
+## 🏗️ CURRENT ARCHITECTURE
+
+### **Completed Components:**
+- ✅ **Main.java**: Entry point with debug mode and launch options
+- ✅ **DebugUtils.java**: Real-time visual debugging console  
+- ✅ **LoginFrame_1.java**: Polished authentication (email-based, inline validation, Enter key support)
+- ✅ **UserDAO.java**: SHA-256 password hashing implemented
+- ✅ **DBManager.java**: Database connection management
+- ✅ **User.java**: User model with proper getters/setters
+
+### **Existing UI Components** (Need Analysis/Polish):
+- 📋 **AdminDashboard_2.java**: Admin management interface
+- 📋 **MovieSelection_3.java**: User movie browsing interface  
+- 📋 **SeatSelection_4.java**: Seat booking interface
+- 📋 **Other UI components**: Various management screens
+
+---
+
+## 🔧 DEVELOPMENT STANDARDS
+
+### **Code Style Guidelines:**
+- **Fonts**: `SansSerif, BOLD, 18pt` for labels, `SansSerif, PLAIN, 18pt` for fields
+- **Layout**: `GridBagLayout` with `new Insets(10, 10, 10, 10)` spacing
+- **Colors**: Background `Color(234, 224, 213)`, Buttons `Color(34, 51, 59)`
+- **Error Handling**: Inline messages, NO popups (JOptionPane forbidden in new code)
+- **Security**: All passwords must use SHA-256 hashing via UserDAO methods
+
+### **Validation Patterns:**
+- Use `showError(message)` for inline error display
+- Use `showSuccess(message)` for success confirmation  
+- Call `clearMessages()` at start of user actions
+- Implement `isValidEmail(email)` pattern for email validation
+- Auto-focus invalid fields with `field.requestFocus()`
+
+### **Database Interaction:**
+- Use existing DAO classes (UserDAO, MovieDAO, etc.)
+- All password operations automatically hash with SHA-256
+- Handle SQL exceptions gracefully with user-friendly messages
+- Use PreparedStatement pattern (already implemented in DAOs)
+
+---
+
+## 📁 FOLDER STRUCTURE
+
+```
+work_to_do/
+├── Joel/           - Registration system implementation
+├── Christo/        - [Task TBD]  
+├── Navaneeth/      - [Task TBD]
+├── Sai/            - [Task TBD]
+└── Ashish/         - [Task TBD]
+```
+
+---
+
+## 🚀 LAUNCH COMMANDS
+
+**Development Mode:**
+```bash
+cd /home/christo/MMS-OOP-Project
+mvn compile exec:java -Dexec.mainClass="com.mms.Main"
+```
+
+**Debug Mode:**
+```bash
+mvn exec:java -Dexec.mainClass="com.mms.Main" -Dexec.args="--debug"
+```
+
+**Test Mode:**
+```bash
+mvn exec:java -Dexec.mainClass="com.mms.Main" -Dexec.args="--test"
+```
+
+---
+
+## 📊 SECURITY STATUS
+
+- ✅ **Password Hashing**: SHA-256 implemented
+- ✅ **Input Validation**: Comprehensive validation in LoginFrame_1
+- ✅ **SQL Injection Protection**: PreparedStatement usage throughout
+- ⚠️ **Session Management**: Not yet implemented
+- ⚠️ **Authorization**: Basic role-based routing exists
+
+---
+
+## 🗄️ DATABASE SCHEMA QUICK REFERENCE
+
+```sql
+-- Users (Authentication)
+users: user_id, name, email, password (hashed), role
+
+-- Movies (Catalog)  
+movies: movie_id, title, duration, genre, language, certificate, poster_url
+
+-- Showtimes (Scheduling)
+showtimes: showtime_id, movie_id, date, time, screen_number
+
+-- Bookings (Transactions)
+bookings: booking_id, user_id, showtime_id, seat_number, booking_date
+```
+
+---
+
+## 📝 CHANGE TRACKING
+
+All changes documented in: `/home/christo/MMS-OOP-Project/CHANGES.txt`
+
+**Recent Major Changes:**
+- Email-based authentication implemented
+- SHA-256 password hashing added  
+- Inline error messaging system
+- Enter key support for login
+- Debug console with real-time logging
+
+---
+
+**✅ Ready for team task assignments! Each member should read their individual task file for detailed implementation instructions.**

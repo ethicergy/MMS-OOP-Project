@@ -109,6 +109,28 @@ public class ShowtimeDAO {
 	        }
 	        return list;
 	    }
+
+	public List<Showtime> getShowtimesByDate(java.time.LocalDate date) {
+		String sql = "SELECT * FROM showtimes WHERE date = ? ORDER BY time";
+		List<Showtime> list = new ArrayList<>();
+		
+		try (DBManager db = new DBManager();
+			 Connection conn = db.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setDate(1, java.sql.Date.valueOf(date));
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					list.add(mapRowtoShowtime(rs));
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error fetching showtimes for date " + date + ": " + e.getMessage());
+			e.printStackTrace();
+		}
+		return list;
+	}
 	
 	private Showtime mapRowtoShowtime(ResultSet rs) throws SQLException {
 		Showtime s = new Showtime();

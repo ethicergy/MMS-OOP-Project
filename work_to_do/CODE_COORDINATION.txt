@@ -1,0 +1,175 @@
+# 🚨 CODE COORDINATION & CONFLICT PREVENTION
+
+**Last Updated**: September 21, 2025  
+**Purpose**: Prevent team members from editing same files simultaneously
+
+---
+
+## 🔒 FILE OWNERSHIP & LOCKS
+
+### **🟢 AVAILABLE FOR ASSIGNMENT:**
+- `AdminDashboard_2.java` - Admin management interface
+- `MovieSelection_3.java` - User movie browsing  
+- `SeatSelection_4.java` - Seat booking interface
+- `AddMovieDialog.java` - Movie management dialog
+- `AddShowtimeDialog.java` - Showtime management dialog  
+- `BookingSummary.java` - Booking review interface
+- `BookingSummaryFrame.java` - Booking summary window
+- `BookingSuccessfulFrame.java` - Success confirmation
+
+### **🔴 CURRENTLY LOCKED:**
+- `LoginFrame_1.java` - **LOCKED BY JOEL** (Registration implementation)
+- `MovieSelection_3.java` - **LOCKED BY CHRISTO** (Movie browsing UX enhancement)
+- `AdminDashboard_2.java` - **LOCKED BY NAVANEETH** (Admin interface + navigation system)
+- `UserDAO.java` - **LOCKED** (Recently modified - password hashing)
+- `Main.java` - **LOCKED** (Recently modified - debug system)
+- `DebugUtils.java` - **LOCKED** (Recently modified)
+
+### **🔵 SHARED/READ-ONLY:**
+- All `models/` classes (User.java, Movie.java, etc.) - **READ-ONLY**
+- `DBManager.java` - **READ-ONLY** 
+- All other `dao/` classes - **READ-ONLY** (unless specifically assigned)
+
+---
+
+## 📋 TASK ASSIGNMENT STRATEGY
+
+### **CONFLICT-FREE APPROACH:**
+Each team member gets assigned **one primary UI component** that doesn't interact with others' work.
+
+### **PROPOSED ASSIGNMENTS:**
+
+#### **🎯 JOEL** (Already Assigned)
+- **File**: `LoginFrame_1.java`
+- **Task**: Registration system
+- **No Conflicts**: Self-contained in login screen
+
+#### **🎯 CHRISTO** (Next)
+- **File**: `AdminDashboard_2.java` 
+- **Task**: Polish admin interface - movie/user management
+- **No Conflicts**: Admin-only functionality
+
+#### **🎯 NAVANEETH** (Suggested)
+- **File**: `MovieSelection_3.java`
+- **Task**: Polish user movie browsing experience  
+- **No Conflicts**: User-side functionality only
+
+#### **🎯 SAI** (Suggested)
+- **File**: `SeatSelection_4.java`
+- **Task**: Improve seat booking UX and validation
+- **No Conflicts**: Booking-specific functionality
+
+#### **🎯 ASHISH** (Suggested)
+- **File**: `BookingSummary.java` + `BookingSummaryFrame.java`
+- **Task**: Polish booking confirmation and payment flow
+- **No Conflicts**: End-of-flow functionality
+
+---
+
+## 🚨 CONFLICT PREVENTION RULES
+
+### **1. ONE FILE PER PERSON**
+- Each team member owns exactly ONE primary file
+- No editing files assigned to others
+- No simultaneous edits on shared files
+
+### **2. READ-ONLY DEPENDENCIES**
+- Can READ other files for understanding
+- Cannot MODIFY other team members' files
+- Use existing public methods/interfaces only
+
+### **3. MODEL/DAO COORDINATION**  
+- All model classes (User, Movie, etc.) are **READ-ONLY**
+- DAO modifications require team approval
+- Database schema changes need coordination
+
+### **4. INTEGRATION POINTS**
+- Navigation between components stays unchanged
+- Public method signatures cannot be modified
+- Constructor parameters must remain compatible
+
+---
+
+## 🔧 SAFE INTEGRATION PATTERNS
+
+### **APPROVED INTERACTIONS:**
+```java
+// ✅ SAFE: Calling existing public methods
+new AdminDashboard_2().setVisible(true);
+UserDAO userDAO = new UserDAO();
+User user = userDAO.getUserById(id);
+
+// ✅ SAFE: Using existing models
+Movie movie = new Movie();
+movie.setTitle("Example");
+
+// ❌ UNSAFE: Modifying other team's classes
+// Don't add new methods to others' UI classes
+// Don't change existing method signatures
+```
+
+### **COORDINATION REQUIRED:**
+- Adding new database tables/columns
+- Modifying shared utility classes  
+- Changing navigation flow between components
+- Adding new model properties
+
+---
+
+## 📞 COMMUNICATION PROTOCOL
+
+### **BEFORE STARTING WORK:**
+1. Check this file for current locks
+2. Announce your file assignment in team chat
+3. Update the lock status below
+
+### **DURING DEVELOPMENT:**
+1. Test your component in isolation first
+2. Document any dependencies on other components
+3. Don't modify files owned by others
+
+### **BEFORE MERGING:**
+1. Verify no conflicts with locked files
+2. Test integration with unchanged components
+3. Update this coordination file
+
+---
+
+## 📊 CURRENT LOCK STATUS
+
+### **LOCKED FILES:**
+| File | Owner | Task | Status | ETA |
+|------|--------|------|---------|-----|
+| `LoginFrame_1.java` | Joel | Registration System | In Progress | TBD |
+| `MovieSelection_3.java` | Christo | Movie Browsing UX Enhancement | Ready to Start | TBD |
+| `AdminDashboard_2.java` | Navaneeth | Admin Interface + Navigation System | Ready to Start | TBD |
+| `UserDAO.java` | System | Recently Modified | Protected | N/A |
+| `Main.java` | System | Recently Modified | Protected | N/A |
+
+### **NEXT ASSIGNMENTS:**
+| Team Member | Suggested File | Task Type | Ready |
+|-------------|----------------|-----------|--------|
+| Christo | `MovieSelection_3.java` | Movie Browsing UX Polish | ✅ |
+| Navaneeth | `AdminDashboard_2.java` | Admin Interface + Navigation | ✅ |
+| Sai | `SeatSelection_4.java` | Booking UX Polish | ✅ |
+| Ashish | `BookingSummary.java` | Payment Flow Polish | ✅ |
+
+---
+
+## 🎯 ASSIGNMENT PHILOSOPHY
+
+**PARALLEL DEVELOPMENT:**
+- Each component can be developed independently
+- No cross-component dependencies
+- Integration happens at navigation level only
+- Each team member becomes expert in their component
+
+**SHARED STANDARDS:**
+- Same visual style (colors, fonts, layouts)
+- Same validation patterns (inline messages)
+- Same error handling approach
+- Same security standards (password hashing)
+
+---
+
+**⚠️ UPDATE THIS FILE WHEN TAKING ON A TASK TO PREVENT CONFLICTS!**

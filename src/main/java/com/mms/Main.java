@@ -142,23 +142,24 @@ public class Main {
         MovieDAO movieDAO = new MovieDAO();
         int createdMovieId = -1;
         
-        // Create multiple movies
-        System.out.println("Creating test movies...");
+        // DISABLED: Movie creation now handled via direct database insertion
+        // System.out.println("Creating test movies...");
+        System.out.println("📋 Using existing movies from database...");
         
-        Movie movie1 = new Movie("Inception", 148, "Sci-Fi", "English", "U/A", "https://example.com/inception.jpg");
-        Movie movie2 = new Movie("The Dark Knight", 152, "Action", "English", "U/A", "https://example.com/dark-knight.jpg");
-        Movie movie3 = new Movie("Interstellar", 169, "Sci-Fi", "English", "U/A", "https://example.com/interstellar.jpg");
-        Movie movie4 = new Movie("Tenet", 150, "Thriller", "English", "U/A", "https://example.com/tenet.jpg");
+        // Movie movie1 = new Movie("Inception", 148, "Sci-Fi", "English", "U/A", "https://example.com/inception.jpg");
+        // Movie movie2 = new Movie("The Dark Knight", 152, "Action", "English", "U/A", "https://example.com/dark-knight.jpg");
+        // Movie movie3 = new Movie("Interstellar", 169, "Sci-Fi", "English", "U/A", "https://example.com/interstellar.jpg");
+        // Movie movie4 = new Movie("Tenet", 150, "Thriller", "English", "U/A", "https://example.com/tenet.jpg");
         
-        boolean created1 = movieDAO.createMovie(movie1);
-        boolean created2 = movieDAO.createMovie(movie2);
-        boolean created3 = movieDAO.createMovie(movie3);
-        boolean created4 = movieDAO.createMovie(movie4);
+        // boolean created1 = movieDAO.createMovie(movie1);
+        // boolean created2 = movieDAO.createMovie(movie2);
+        // boolean created3 = movieDAO.createMovie(movie3);
+        // boolean created4 = movieDAO.createMovie(movie4);
         
-        System.out.println(created1 ? "✅ Inception created" : "❌ Inception creation failed");
-        System.out.println(created2 ? "✅ The Dark Knight created" : "❌ The Dark Knight creation failed");
-        System.out.println(created3 ? "✅ Interstellar created" : "❌ Interstellar creation failed");
-        System.out.println(created4 ? "✅ Tenet created" : "❌ Tenet creation failed");
+        // System.out.println(created1 ? "✅ Inception created" : "❌ Inception creation failed");
+        // System.out.println(created2 ? "✅ The Dark Knight created" : "❌ The Dark Knight creation failed");
+        // System.out.println(created3 ? "✅ Interstellar created" : "❌ Interstellar creation failed");
+        // System.out.println(created4 ? "✅ Tenet created" : "❌ Tenet creation failed");
         
         // Get all movies and find an ID for further testing
         List<Movie> allMovies = movieDAO.getAllMovies();
@@ -199,23 +200,23 @@ public class Main {
         ShowtimeDAO showtimeDAO = new ShowtimeDAO();
         int createdShowtimeId = -1;
         
-        System.out.println("Creating test showtimes for movie ID: " + movieId);
+        // DISABLED: Showtime creation now handled via direct database insertion
+        System.out.println("📋 Using existing showtimes from database for movie ID: " + movieId);
         
-        // Create multiple showtimes for the movie
-        Showtime morning = new Showtime(movieId, LocalDate.now().plusDays(1), LocalTime.of(10, 0), 1);
-        Showtime afternoon = new Showtime(movieId, LocalDate.now().plusDays(1), LocalTime.of(14, 30), 1);
-        Showtime evening = new Showtime(movieId, LocalDate.now().plusDays(1), LocalTime.of(18, 0), 2);
-        Showtime night = new Showtime(movieId, LocalDate.now().plusDays(2), LocalTime.of(21, 30), 2);
+        // Showtime morning = new Showtime(movieId, LocalDate.now().plusDays(1), LocalTime.of(10, 0), 1);
+        // Showtime afternoon = new Showtime(movieId, LocalDate.now().plusDays(1), LocalTime.of(14, 30), 1);
+        // Showtime evening = new Showtime(movieId, LocalDate.now().plusDays(1), LocalTime.of(18, 0), 2);
+        // Showtime night = new Showtime(movieId, LocalDate.now().plusDays(2), LocalTime.of(21, 30), 2);
         
-        boolean created1 = showtimeDAO.createShowtime(morning);
-        boolean created2 = showtimeDAO.createShowtime(afternoon);
-        boolean created3 = showtimeDAO.createShowtime(evening);
-        boolean created4 = showtimeDAO.createShowtime(night);
+        // boolean created1 = showtimeDAO.createShowtime(morning);
+        // boolean created2 = showtimeDAO.createShowtime(afternoon);
+        // boolean created3 = showtimeDAO.createShowtime(evening);
+        // boolean created4 = showtimeDAO.createShowtime(night);
         
-        System.out.println(created1 ? "✅ Morning showtime created" : "❌ Morning showtime creation failed");
-        System.out.println(created2 ? "✅ Afternoon showtime created" : "❌ Afternoon showtime creation failed");
-        System.out.println(created3 ? "✅ Evening showtime created" : "❌ Evening showtime creation failed");
-        System.out.println(created4 ? "✅ Night showtime created" : "❌ Night showtime creation failed");
+        // System.out.println(created1 ? "✅ Morning showtime created" : "❌ Morning showtime creation failed");
+        // System.out.println(created2 ? "✅ Afternoon showtime created" : "❌ Afternoon showtime creation failed");
+        // System.out.println(created3 ? "✅ Evening showtime created" : "❌ Evening showtime creation failed");
+        // System.out.println(created4 ? "✅ Night showtime created" : "❌ Night showtime creation failed");
         
         // Get showtimes by movie ID
         List<Showtime> movieShowtimes = showtimeDAO.getShowtimesByMovieId(movieId);
@@ -325,7 +326,7 @@ public class Main {
         }
 
         // Depopulate the tables for clean testing
-        DBManager.clearAndResetTables();
+        // DBManager.clearAndResetTables(); // COMMENTED OUT TO PRESERVE TEST DATA
 
         //   Test UserDAO (user)
         User newUser = new User("Protagonist", "tenet@gmail.com", "tenet", "user");
