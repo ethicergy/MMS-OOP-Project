@@ -304,4 +304,30 @@ public class SeatDAO {
         }
         return total;
     }
+    
+    /**
+     * Ensures seats exist for a showtime with the SeatSelection_4 layout
+     * Creates seats matching the theater layout: A1-A16, B1-B16, etc.
+     */
+    public void ensureSeatsForShowtime(int showtimeId) {
+        // Check if seats already exist
+        String checkSql = "SELECT COUNT(*) as seat_count FROM seats WHERE showtime_id = ?";
+        
+        try(DBManager db = new DBManager(); Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(checkSql)) {
+            stmt.setInt(1, showtimeId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if(rs.next() && rs.getInt("seat_count") > 0) {
+                return; // Seats already exist
+            }
+            
+            // Create seats matching SeatSelection_4 layout
+            List<String> rows = Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L");
+            createSeatsForShowtime(showtimeId, rows, 16);
+            
+        } catch (SQLException e) {
+            System.err.println("Error checking/creating seats for showtime " + showtimeId + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
