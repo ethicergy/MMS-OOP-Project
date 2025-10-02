@@ -6,8 +6,8 @@ import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
+// import java.math.BigDecimal;
+// import java.time.format.DateTimeFormatter;
 import com.mms.models.Movie;
 import com.mms.models.Showtime;
 import com.mms.dao.BookingDAO;
@@ -381,11 +381,11 @@ public class SeatSelection_4 extends JFrame {
             // For numbering across (1..16)
             int[] midBlockCols = new int[] { leftMidCols, centerMidCols, rightMidCols };
             int[] midBlockRows = new int[] { leftMidRows, centerMidRows, rightMidRows };
-            int midColsTotal = leftMidCols + centerMidCols + rightMidCols; // 16
+            //int midColsTotal = leftMidCols + centerMidCols + rightMidCols; // 16
 
             // compute max mid rows for vertical spacing
             int midRowsMax = Math.max(Math.max(leftMidRows, centerMidRows), rightMidRows);
-            int midBlockW = midLeftW; // not used; we'll compute each blockX
+            //int midBlockW = midLeftW; // not used; we'll compute each blockX
 
             // Build middle seats row by row (rows aligned at top)
             for (int r = 0; r < midRowsMax; r++) {
