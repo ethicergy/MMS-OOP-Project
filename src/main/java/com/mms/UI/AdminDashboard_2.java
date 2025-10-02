@@ -3,13 +3,16 @@ package com.mms.UI;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.util.List;
-import com.mms.dao.MovieDAO;
+import com.mms.controllers.MovieController;
 import com.mms.models.Movie;
 import java.awt.*;
 
 public class AdminDashboard_2 extends JFrame {
 
+    private MovieController movieController;
+
     public AdminDashboard_2() {
+        this.movieController = new MovieController();
         setTitle("Admin Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
@@ -150,8 +153,7 @@ public class AdminDashboard_2 extends JFrame {
     private DefaultTableModel tableModel;
 
     public JTable loadMovies(){
-        MovieDAO movieDAO = new MovieDAO();
-        List<Movie> movies = movieDAO.getAllMovies();
+        List<Movie> movies = movieController.getAllMovies();
         String[] columns = {"Title", "Duration", "Language", "Actions", "MovieId"};
         Object[][] data = new Object[movies.size()][5];
         for (int i = 0; i < movies.size(); i++) {
@@ -183,12 +185,10 @@ public class AdminDashboard_2 extends JFrame {
         movieTable.getColumnModel().getColumn(4).setMaxWidth(0);
         movieTable.getColumnModel().getColumn(4).setWidth(0);
         return movieTable;
-        
     }
     
     public void refreshMovieTable() {
-        MovieDAO movieDAO = new MovieDAO();
-        List<Movie> movies = movieDAO.getAllMovies();
+        List<Movie> movies = movieController.getAllMovies();
         tableModel.setRowCount(0); // Clear existing rows
         for (Movie movie : movies) {
             String title = movie.getTitle();
@@ -237,13 +237,12 @@ public class AdminDashboard_2 extends JFrame {
                 try {
                     // Stop editing immediately to prevent multiple triggers
                     fireEditingStopped();
-                    
-                    MovieDAO movieDAO = new MovieDAO();
-                    Movie movie = movieDAO.getMoviebyId(movieid);
+                    MovieController movieController = ((AdminDashboard_2) parentFrame).movieController;
+                    Movie movie = movieController.getMovieById(movieid);
                     if (movie != null) {
                         // Create callback for when movie is updated
                         Runnable updateCallback = () -> {
-                            Movie updatedMovie = movieDAO.getMoviebyId(movieid);
+                            Movie updatedMovie = movieController.getMovieById(movieid);
                             if (parentFrame instanceof AdminDashboard_2) {
                                 tableModel.setValueAt(updatedMovie.getTitle(), row, 0);
                                 tableModel.setValueAt(updatedMovie.getDuration() + " mins", row, 1);
@@ -263,19 +262,18 @@ public class AdminDashboard_2 extends JFrame {
                 try {
                     // Stop editing immediately to prevent multiple triggers
                     fireEditingStopped();
-                    
                     int confirm = JOptionPane.showConfirmDialog(parentFrame, 
                         "Are you sure you want to delete this movie?", 
                         "Confirm Delete", 
                         JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
-                        MovieDAO movieDAO = new MovieDAO();
-                        boolean success = movieDAO.deleteMovie(movieid);
-                        if (success) {
+                        MovieController movieController = ((AdminDashboard_2) parentFrame).movieController;
+                        try {
+                            movieController.deleteMovie(movieid);
                             tableModel.removeRow(row);
                             JOptionPane.showMessageDialog(parentFrame, "Movie deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(parentFrame, "Cannot delete movie. It may have associated showtimes.", "Error", JOptionPane.ERROR_MESSAGE);
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(parentFrame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } catch (Exception ex) {

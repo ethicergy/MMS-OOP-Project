@@ -2,7 +2,7 @@ package com.mms.UI;
 
 import javax.swing.*;
 import java.awt.*;
-import com.mms.controllers.MovieController;
+import com.mms.dao.MovieDAO;
 import com.mms.dao.ShowtimeDAO;
 
 import java.util.ArrayList;
@@ -128,28 +128,28 @@ public class AddMovieDialog extends JDialog {
             String genre_var = genreField.getText().trim();
             String language = languageField.getText().trim();
             String certificate = certificateField.getText().trim();
-            
-            MovieController movieController = new MovieController();
-            
-            if (!movieController.validateMovie(title, duration, genre_var, language, certificate)) {
+            if (title.isEmpty() || duration.isEmpty() || genre_var.isEmpty() || language.isEmpty() || certificate.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
             try {
-                int dur = movieController.validateDuration(duration);
-                String posterUrl = posterField.getText().trim();
-                movieController.createMovie(title, dur, genre_var, language, certificate, posterUrl);
-                JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                if (parent instanceof AdminDashboard_2) {
-                    ((AdminDashboard_2) parent).dispose();
-                    new AdminDashboard_2().setVisible(true);
+                int dur = Integer.parseInt(duration);
+                if (dur <= 0) {
+                    JOptionPane.showMessageDialog(this, "Duration must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                } else {
+                    String posterUrl = posterField.getText().trim();
+                    Movie newMovie = new Movie(title, dur, genre_var, language, certificate, posterUrl);
+                    MovieDAO movieDAO = new MovieDAO();
+                    movieDAO.createMovie(newMovie);
+                    JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    if (parent instanceof AdminDashboard_2) {
+                        ((AdminDashboard_2) parent).dispose();
+                        new AdminDashboard_2().setVisible(true);;
+                    }
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Duration must be a valid integer.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
@@ -270,26 +270,28 @@ public class AddMovieDialog extends JDialog {
             String genre_var = genreField.getText().trim();
             String language = languageField.getText().trim();
             String certificate = certificateField.getText().trim();
-            MovieController movieController = new MovieController();
-            
-            if (!movieController.validateMovie(title, duration, genre_var, language, certificate)) {
+            if (title.isEmpty() || duration.isEmpty() || genre_var.isEmpty() || language.isEmpty() || certificate.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
             try {
-                int dur = movieController.validateDuration(duration);
-                String posterUrl = posterField.getText().trim();
-                movieController.createMovie(title, dur, genre_var, language, certificate, posterUrl);
-                JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-                if (onSaveCallback != null) {
-                    onSaveCallback.run();
+                int dur = Integer.parseInt(duration);
+                if (dur <= 0) {
+                    JOptionPane.showMessageDialog(this, "Duration must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                } else {
+                    String posterUrl = posterField.getText().trim();
+                    Movie newMovie = new Movie(title, dur, genre_var, language, certificate, posterUrl);
+                    MovieDAO movieDAO = new MovieDAO();
+                    movieDAO.createMovie(newMovie);
+                    JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                    if (onSaveCallback != null) {
+                        onSaveCallback.run();
+                    }
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Duration must be a valid integer.", "Error", JOptionPane.ERROR_MESSAGE);
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error adding movie: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -428,18 +430,20 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
         String genre_var = genreField.getText().trim();
         String language = languageField.getText().trim();
         String certificate = certificateField.getText().trim();
-        MovieController movieController = new MovieController();
-        
-        if (!movieController.validateMovie(title, duration, genre_var, language, certificate)) {
+        if (title.isEmpty() || duration.isEmpty() || genre_var.isEmpty() || language.isEmpty() || certificate.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
         try {
-            int dur = movieController.validateDuration(duration);
+            int dur = Integer.parseInt(duration);
+            if (dur <= 0) {
+                JOptionPane.showMessageDialog(this, "Duration must be a positive integer.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             String posterUrl = posterField.getText().trim();
             Movie updatedMovie = new Movie(movie.getMovieId(), title, dur, genre_var, language, certificate, posterUrl);
-            movieController.updateMovie(updatedMovie);
+            MovieDAO movieDAO = new MovieDAO();
+            movieDAO.updateMovie(updatedMovie); // You need to implement updateMovie in MovieDAO
 
             // Update showtimes if any loaded
             if (!loadedShowtimes.isEmpty()) {
