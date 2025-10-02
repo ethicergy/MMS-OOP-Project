@@ -1,5 +1,6 @@
 package com.mms.UI;
-
+import java.util.List;
+import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
 import com.mms.dao.MovieDAO;
@@ -9,12 +10,13 @@ import com.mms.models.Showtime;
 
 
 public class AddShowtimeDialog extends JDialog {
+    Color bgColor = new Color(198, 172, 143);
     public AddShowtimeDialog(JFrame parent) {
         super(parent, "Add New Showtime", true);
         setSize(650, 700);
         setLocationRelativeTo(parent);
         setResizable(false);
-        getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(234, 224, 213)));
+        getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(235, 224, 213)));
 
         MovieDAO movieDAO = new MovieDAO();
         java.util.List<Movie> movies = movieDAO.getAllMovies();
@@ -33,8 +35,10 @@ public class AddShowtimeDialog extends JDialog {
         JSpinner endDateSpinner = new JSpinner(new SpinnerDateModel());
         JSpinner numShowsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
         JSpinner screenSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
+        List<JPanel> panels = new ArrayList<>();
 
         JPanel timeFieldsPanel = new JPanel();
+        timeFieldsPanel.setBackground(new Color(234, 224, 213));
         timeFieldsPanel.setLayout(new BoxLayout(timeFieldsPanel, BoxLayout.Y_AXIS));
 
         // Dynamic time fields for shows
@@ -56,6 +60,7 @@ public class AddShowtimeDialog extends JDialog {
             
             for (int i = 0; i < numShows; i++) {
                 JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+                row.setBackground(new Color(234, 224, 213));
                 row.setBorder(BorderFactory.createEtchedBorder());
                 
                 JLabel showLabel = new JLabel("Show " + (i+1) + ":");
@@ -93,13 +98,18 @@ public class AddShowtimeDialog extends JDialog {
 
         JButton addButton = new JButton("Add Showtimes");
         JButton cancelButton = new JButton("Cancel");
-        
+        addButton.setBackground(new Color(34, 51, 59));
+        addButton.setForeground(Color.WHITE);
+        cancelButton.setBackground(new Color(34, 51, 59));
+        cancelButton.setForeground(Color.WHITE);
         // Main panel with proper layout
         JPanel mainPanel = new JPanel(new BorderLayout());
+        panels.add(mainPanel);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // Form panel with GridBagLayout for better alignment
         JPanel formPanel = new JPanel(new GridBagLayout());
+        panels.add(formPanel);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
@@ -150,6 +160,10 @@ public class AddShowtimeDialog extends JDialog {
         
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        panels.add(buttonPanel);
+        for (JPanel p : panels) {
+            p.setBackground(bgColor);
+        }
         addButton.setPreferredSize(new Dimension(120, 35));
         cancelButton.setPreferredSize(new Dimension(120, 35));
         buttonPanel.add(addButton);

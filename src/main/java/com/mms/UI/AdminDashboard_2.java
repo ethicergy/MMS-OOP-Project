@@ -13,7 +13,7 @@ public class AdminDashboard_2 extends JFrame {
         setTitle("Admin Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
-        getContentPane().setBackground(new Color(235, 224, 213));
+        getContentPane().setBackground(new Color(234, 224, 213));
         setLayout(new BorderLayout(10, 20));
         setIconImage(new ImageIcon("title-logo.png").getImage());
 
@@ -21,7 +21,7 @@ public class AdminDashboard_2 extends JFrame {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(new Color(235, 224, 213));
+        mainPanel.setBackground(new Color(234, 224, 213));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
         JLabel titleLabel = new JLabel("ADMIN DASHBOARD", JLabel.CENTER);
@@ -66,7 +66,7 @@ public class AdminDashboard_2 extends JFrame {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.setBackground(new Color(235, 224, 213));
+        buttonPanel.setBackground(new Color(234, 224, 213));
 
         JButton addMovieBtn = new JButton("Add Movie");
         JButton addShowtimeBtn = new JButton("Add Showtime");

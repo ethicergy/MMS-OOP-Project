@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import com.mms.dao.MovieDAO;
 import com.mms.dao.ShowtimeDAO;
+
+import java.util.ArrayList;
 import java.util.List;
 import com.mms.models.Movie;
 import com.mms.models.Showtime;
@@ -12,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 public class AddMovieDialog extends JDialog {
+    Color bgColor = new Color(198, 172, 143);
     public AddMovieDialog(JFrame parent) {
         super(parent, "Add New Movie", true);
         setSize(500, 500);
@@ -20,7 +23,7 @@ public class AddMovieDialog extends JDialog {
         JLabel titleLabel = new JLabel("Movie Title:");
         JTextField titleField = new JTextField(10);
         JLabel durationLabel = new JLabel("Duration (mins):");
-        JTextField durationField = new JTextField(1);
+        JTextField durationField = new JTextField(4);
         JLabel genre = new JLabel("Genre:");
         JTextField genreField = new JTextField(10);
         JLabel languageLabel = new JLabel("Language:");
@@ -33,7 +36,13 @@ public class AddMovieDialog extends JDialog {
         JButton uploadButton = new JButton("Upload Image");
         JButton addButton = new JButton("Add Movie");
         JButton cancelButton = new JButton("Cancel");
-        
+        addButton.setBackground(new Color(34, 51, 59));
+        addButton.setForeground(Color.WHITE);
+        cancelButton.setBackground(new Color(34, 51, 59));
+        cancelButton.setForeground(Color.WHITE);
+        uploadButton.setBackground(new Color(34, 51, 59));
+        uploadButton.setForeground(Color.WHITE);
+
         // File upload functionality
         uploadButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -58,8 +67,11 @@ public class AddMovieDialog extends JDialog {
                 }
             }
         });
+    
+    List<JPanel> panels = new ArrayList<>();
         
     JPanel panel = new JPanel(new GridBagLayout());
+    panels.add(panel);
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(8, 8, 8, 8);
     gbc.anchor = GridBagConstraints.LINE_END;
@@ -89,6 +101,7 @@ public class AddMovieDialog extends JDialog {
     panel.add(certificateField, gbc);
     gbc.gridy++;
     JPanel posterPanel = new JPanel(new BorderLayout(5,0));
+    panels.add(posterPanel);
     posterPanel.add(posterField, BorderLayout.CENTER);
     posterPanel.add(uploadButton, BorderLayout.EAST);
     panel.add(posterPanel, gbc);
@@ -98,10 +111,15 @@ public class AddMovieDialog extends JDialog {
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+    panels.add(buttonPanel);
+    for (JPanel p : panels) {
+        p.setBackground(bgColor);
+    }
     buttonPanel.add(addButton);
     buttonPanel.add(cancelButton);
     panel.add(buttonPanel, gbc);
 
+    
     add(panel);
     pack();
         addButton.addActionListener(e -> {
@@ -191,8 +209,9 @@ public class AddMovieDialog extends JDialog {
                 }
             }
         });
-        
+    List<JPanel> panels = new ArrayList<>();
     JPanel panel = new JPanel(new GridBagLayout());
+    panels.add(panel);
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(8, 8, 8, 8);
     gbc.anchor = GridBagConstraints.LINE_END;
@@ -222,6 +241,7 @@ public class AddMovieDialog extends JDialog {
     panel.add(certificateField, gbc);
     gbc.gridy++;
     JPanel posterPanel = new JPanel(new BorderLayout(5,0));
+    panels.add(posterPanel);
     posterPanel.add(posterField, BorderLayout.CENTER);
     posterPanel.add(uploadButton, BorderLayout.EAST);
     panel.add(posterPanel, gbc);
@@ -231,6 +251,10 @@ public class AddMovieDialog extends JDialog {
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+    for (JPanel p : panels) {
+        p.setBackground(bgColor);
+    }
+    panels.add(buttonPanel);
     buttonPanel.add(addButton);
     buttonPanel.add(cancelButton);
     panel.add(buttonPanel, gbc);
@@ -334,8 +358,9 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
     JSpinner dateSpinner = new JSpinner(new SpinnerDateModel());
     dateSpinner.setEditor(new JSpinner.DateEditor(dateSpinner, "dd/MM/yyyy"));
     JButton loadShowtimesBtn = new JButton("Load Showtimes");
-
+    List<JPanel> panels = new ArrayList<>();
     JPanel showtimesPanel = new JPanel();
+    panels.add(showtimesPanel);
     showtimesPanel.setLayout(new BoxLayout(showtimesPanel, BoxLayout.Y_AXIS));
     JScrollPane showtimesScroll = new JScrollPane(showtimesPanel);
 
@@ -362,6 +387,7 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
             if (s.getDate().isEqual(selectedDate)) {
                 loadedShowtimes.add(s);
                 JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+                panels.add(row);
                 JLabel showLabel = new JLabel("Show " + (++count) + ":");
                 int hour = s.getTime().getHour();
                 int minute = s.getTime().getMinute();
@@ -457,6 +483,7 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
     cancelButton.addActionListener(e -> dispose());
 
     JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 10));
+    panels.add(formPanel);
     formPanel.add(titleLabel); formPanel.add(titleField);
     formPanel.add(durationLabel); formPanel.add(durationField);
     formPanel.add(genreLabel); formPanel.add(genreField);
@@ -466,15 +493,21 @@ public AddMovieDialog(JFrame parent, Movie movie, Runnable onSaveCallback) {
     formPanel.add(new JLabel()); formPanel.add(uploadButton);
 
     JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panels.add(datePanel);
     datePanel.add(dateLabel);
     datePanel.add(dateSpinner);
     datePanel.add(loadShowtimesBtn);
 
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+    panels.add(buttonPanel);
     buttonPanel.add(saveButton);
     buttonPanel.add(cancelButton);
 
     JPanel mainPanel = new JPanel();
+    panels.add(mainPanel);
+    for (JPanel p : panels) {
+        p.setBackground(bgColor);
+    }
     mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
     mainPanel.add(formPanel);
     mainPanel.add(datePanel);
