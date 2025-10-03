@@ -3,11 +3,11 @@ package com.mms.UI;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import com.mms.dao.UserDAO;
+import com.mms.controllers.UserController;
+import com.mms.controllers.AuthenticationException;
 import com.mms.models.User;
-//import com.mms.UI.AdminDashboard_2;
-import com.mms.UI.MovieSelection_3;
-import com.mms.UI.AdminDashboard_2;
+import com.mms.util.InputValidator;
+import com.mms.util.Logger;
 
 public class LoginFrame_1 extends JFrame {
     public LoginFrame_1() {
@@ -86,19 +86,22 @@ public class LoginFrame_1 extends JFrame {
         loginBtn.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
-            UserDAO userDAO = new UserDAO();
-            User user = userDAO.authenticateUser(username, password);
-            if (user != null) {
+            UserController userController = new UserController();
+            // Use InputValidator for input checks
+            if (InputValidator.isNullOrEmpty(username) || InputValidator.isNullOrEmpty(password)) {
+                JOptionPane.showMessageDialog(LoginFrame_1.this, "Please enter both username and password.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            try {
+                User user = userController.authenticate(username, password);
                 JOptionPane.showMessageDialog(LoginFrame_1.this, "Login successful! Welcome, " + user.getName() + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // Must route to the correct dashboard based on role
-                if (user.getRole().equals("admin")) {
-                    new AdminDashboard_2().setVisible(true);
-                } else {
-                    new MovieSelection_3().setVisible(true);
-                }
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(LoginFrame_1.this, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                userController.rbacDirect(user, LoginFrame_1.this);
+            } catch (AuthenticationException ex) {
+                Logger.log(ex);
+                JOptionPane.showMessageDialog(LoginFrame_1.this, ex.getMessage(), "Login Failed", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                Logger.log(ex);
+                JOptionPane.showMessageDialog(LoginFrame_1.this, "An unexpected error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         formPanel.add(loginBtn, gbc);

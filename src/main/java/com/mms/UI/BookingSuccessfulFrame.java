@@ -8,15 +8,22 @@ import java.awt.*;
 /**
  * BookingSuccessfulFrame — taller + narrower box, neatly aligned with tick mark.
  */
-public class BookingSuccessfulFrame extends JFrame {
 
+import com.mms.controllers.BookingController;
+import com.mms.controllers.BookingSummary;
+import com.mms.models.Movie;
+import com.mms.models.Showtime;
+import java.util.List;
+import com.mms.util.Logger;
+
+public class BookingSuccessfulFrame extends JFrame {
     // Theme colors
     private static final Color BG = new Color(234, 224, 213);
     private static final Color RECT = new Color(198, 172, 143);
     private static final Color BTN = new Color(34, 51, 59);
     private static final Color BORDER = Color.BLACK;
 
-    public BookingSuccessfulFrame() {
+    public BookingSuccessfulFrame(Movie movie, Showtime showtime, List<String> seats, double totalPrice) {
         setTitle("Booking Successful");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
@@ -24,13 +31,21 @@ public class BookingSuccessfulFrame extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(BG);
 
-        // Title
+        BookingSummary summary = null;
+        try {
+            summary = new BookingController().getBookingSummary(movie, showtime, seats, totalPrice);
+        } catch (Exception ex) {
+            Logger.log(ex);
+            JOptionPane.showMessageDialog(this, "Error generating booking summary: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+
         JLabel title = new JLabel("BOOKING SUCCESSFUL", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 36));
         title.setBorder(BorderFactory.createEmptyBorder(30, 0, 10, 0));
         add(title, BorderLayout.NORTH);
 
-        // Center panel (tick + summary)
         JPanel center = new JPanel(new GridBagLayout());
         center.setOpaque(false);
         GridBagConstraints g = new GridBagConstraints();
@@ -38,21 +53,24 @@ public class BookingSuccessfulFrame extends JFrame {
         g.weightx = 1;
         g.insets = new Insets(10, 0, 10, 0);
 
-        // Tick mark image (scaled)
-        ImageIcon tickIcon = new ImageIcon("booking_successful.png"); // your file here
-        Image scaled = tickIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-        JLabel tick = new JLabel(new ImageIcon(scaled));
-        g.gridy = 0;
-        center.add(tick, g);
+        try {
+            ImageIcon tickIcon = new ImageIcon("booking_successful.png");
+            Image scaled = tickIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+            JLabel tick = new JLabel(new ImageIcon(scaled));
+            g.gridy = 0;
+            center.add(tick, g);
+        } catch (Exception ex) {
+            Logger.log(ex);
+            // If image fails, just skip the tick mark
+        }
 
-        // Inner rectangle box (taller + narrower)
         JPanel rectPanel = new JPanel(new GridBagLayout());
         rectPanel.setBackground(RECT);
         rectPanel.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(BORDER, 2),
-                new EmptyBorder(25, 40, 25, 40) // internal padding
+                new EmptyBorder(25, 40, 25, 40)
         ));
-        rectPanel.setPreferredSize(new Dimension(700, 400)); // narrower + taller
+        rectPanel.setPreferredSize(new Dimension(700, 400));
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 22);
         Font valueFont = new Font("SansSerif", Font.PLAIN, 22);
@@ -65,23 +83,18 @@ public class BookingSuccessfulFrame extends JFrame {
         r.fill = GridBagConstraints.HORIZONTAL;
         r.insets = new Insets(14, 0, 14, 0);
 
-        rectPanel.add(createRow("Movie:", "Inception", labelFont, valueFont), r);
-
+        rectPanel.add(createRow("Movie:", summary.movieTitle, labelFont, valueFont), r);
         r.gridy++;
-        rectPanel.add(createRow("Showtime:", "1:00pm  |  Screen 1  |  25/7/25", labelFont, valueFont), r);
-
+        rectPanel.add(createRow("Showtime:", summary.showtimeDisplay, labelFont, valueFont), r);
         r.gridy++;
-        rectPanel.add(createRow("Seats:", "A4, A5, A6", labelFont, valueFont), r);
-
+        rectPanel.add(createRow("Seats:", summary.seatsDisplay, labelFont, valueFont), r);
         r.gridy++;
-        rectPanel.add(createRow("Total Price:", "₹360", labelFont, totalFont), r);
+        rectPanel.add(createRow("Total Price:", summary.totalPriceDisplay, labelFont, totalFont), r);
 
         g.gridy = 1;
         center.add(rectPanel, g);
-
         add(center, BorderLayout.CENTER);
 
-        // Bottom button
         JPanel bottom = new JPanel(new GridBagLayout());
         bottom.setBackground(BG);
         bottom.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
@@ -97,6 +110,14 @@ public class BookingSuccessfulFrame extends JFrame {
         add(bottom, BorderLayout.SOUTH);
 
         setVisible(true);
+    }
+
+    // For legacy/test/demo
+    public BookingSuccessfulFrame() {
+        this(new Movie("Inception", 120, "Sci-Fi", "English", "U/A", null),
+             new Showtime(1, java.time.LocalDate.of(2025, 7, 25), java.time.LocalTime.of(13, 0), 1),
+             java.util.Arrays.asList("A4", "A5", "A6"),
+             360);
     }
 
     private JPanel createRow(String leftText, String rightText, Font leftFont, Font rightFont) {

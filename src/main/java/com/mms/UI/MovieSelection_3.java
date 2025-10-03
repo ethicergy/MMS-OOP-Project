@@ -4,19 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Map;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.awt.image.BufferedImage;
 
-import com.mms.dao.MovieDAO;
-import com.mms.dao.ShowtimeDAO;
+import com.mms.controllers.MovieController;
 import com.mms.models.Movie;
 import com.mms.models.Showtime;
 
 public class MovieSelection_3 extends JFrame {
-    private LocalDate currentSelectedDate = LocalDate.now();
+    // private LocalDate currentSelectedDate = LocalDate.now();
     private List<JButton> dateButtons = new ArrayList<>();
     private JPanel movieListPanel;
 
@@ -174,7 +172,7 @@ private void selectDate(LocalDate date, JButton selectedButton) {
     selectedButton.setForeground(Color.WHITE);
     
     // Update current selected date
-    currentSelectedDate = date;
+    // currentSelectedDate = date;
 }
 private void refreshMoviesForDate(LocalDate selectedDate) {
     movieListPanel.removeAll();
@@ -184,56 +182,42 @@ private void refreshMoviesForDate(LocalDate selectedDate) {
     movieListPanel.add(loadingLabel);
     movieListPanel.revalidate();
     movieListPanel.repaint();
-    
+
     try {
-        ShowtimeDAO showtimeDAO = new ShowtimeDAO();
-        List<Showtime> showtimesForDate = showtimeDAO.getShowtimesByDate(selectedDate);
-        
+        MovieController movieController = new MovieController();
+        Map<Movie, List<Showtime>> moviesWithShowtimes = movieController.getMoviesWithShowtimesForDisplay(selectedDate);
+
         movieListPanel.removeAll();
-        
-        if (showtimesForDate.isEmpty()) {
+
+        if (moviesWithShowtimes.isEmpty()) {
             showNoShowsForDateMessage(selectedDate);
             return;
         }
-        
-        MovieDAO movieDAO = new MovieDAO();
-        Set<Integer> movieIdsWithShows = new HashSet<>();
-        for (Showtime showtime : showtimesForDate) {
-            movieIdsWithShows.add(showtime.getMovieId());
-        }
-        
+
         Color rowColor1 = new Color(234, 224, 213);
         Color rowColor2 = new Color(198, 172, 143);
         int rowIndex = 0;
-        
-        for (Integer movieId : movieIdsWithShows) {
-            Movie movie = movieDAO.getMoviebyId(movieId);
-            if (movie != null) {
-                List<Showtime> movieShowtimes = new ArrayList<>();
-                for (Showtime showtime : showtimesForDate) {
-                    if (showtime.getMovieId() == movieId) {
-                        movieShowtimes.add(showtime);
-                    }
-                }
-                
-                Color bgColor = (rowIndex % 2 == 0) ? rowColor1 : rowColor2;
-                JPanel movieRow = createMovieRow(movie, movieShowtimes, bgColor);
-                movieListPanel.add(movieRow);
-                movieListPanel.add(Box.createVerticalStrut(8));
-                rowIndex++;
-            }
+
+        for (Map.Entry<Movie, List<Showtime>> entry : moviesWithShowtimes.entrySet()) {
+            Movie movie = entry.getKey();
+            List<Showtime> showtimes = entry.getValue();
+            Color bgColor = (rowIndex % 2 == 0) ? rowColor1 : rowColor2;
+            JPanel movieRow = createMovieRow(movie, showtimes, bgColor);
+            movieListPanel.add(movieRow);
+            movieListPanel.add(Box.createVerticalStrut(8));
+            rowIndex++;
         }
-        
+
     } catch (Exception e) {
         movieListPanel.removeAll();
         showErrorMessage("Unable to load movies for " + formatDateForDisplay(selectedDate));
         e.printStackTrace();
     }
-    
+
     movieListPanel.revalidate();
     movieListPanel.repaint();
 }
-private void showNoMoviesMessage() {
+/* private void showNoMoviesMessage() {
     JLabel noMoviesLabel = new JLabel(
         "<html><center><h2>No Movies Available</h2><br>Please check back later for new releases.</center></html>",
         SwingConstants.CENTER
@@ -242,7 +226,7 @@ private void showNoMoviesMessage() {
     noMoviesLabel.setForeground(Color.GRAY);
     noMoviesLabel.setPreferredSize(new Dimension(1000, 200));
     movieListPanel.add(noMoviesLabel);
-}
+}*/
 
 private void showNoShowsForDateMessage(LocalDate date) {
     JLabel noShowsLabel = new JLabel(
@@ -303,11 +287,11 @@ private String formatDateForDisplay(LocalDate date) {
     JPanel genreCertPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
     genreCertPanel.setBackground(bgColor);
     
-    JLabel genreLabel = new JLabel("🎭 " + movie.getGenre());
+    JLabel genreLabel = new JLabel("Genre: " + movie.getGenre());
     genreLabel.setFont(new Font("Arial", Font.PLAIN, 14));
     genreLabel.setForeground(new Color(100, 100, 100));
-    
-    JLabel certLabel = new JLabel("📋 " + movie.getCertificate());
+
+    JLabel certLabel = new JLabel("Certificate: " + movie.getCertificate());
     certLabel.setFont(new Font("Arial", Font.BOLD, 12));
     certLabel.setForeground(new Color(34, 51, 59));
     certLabel.setBorder(BorderFactory.createCompoundBorder(
@@ -322,11 +306,11 @@ private String formatDateForDisplay(LocalDate date) {
     JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
     infoPanel.setBackground(bgColor);
     
-    JLabel durationLabel = new JLabel("⏱️ " + movie.getDuration() + " mins");
+    JLabel durationLabel = new JLabel("Duration: " + movie.getDuration() + " mins");
     durationLabel.setFont(new Font("Arial", Font.PLAIN, 14));
     durationLabel.setForeground(new Color(80, 80, 80));
-    
-    JLabel languageLabel = new JLabel("🌐 " + movie.getLanguage());
+
+    JLabel languageLabel = new JLabel("Language: " + movie.getLanguage());
     languageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
     languageLabel.setForeground(new Color(80, 80, 80));
     

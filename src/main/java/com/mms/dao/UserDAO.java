@@ -10,6 +10,25 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 
 public class UserDAO {
+	public User getUserByUsername(String username) {
+		String sql = "select * from users where name = ?";
+		try (DBManager db = new DBManager(); Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, username);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				User user = new User();
+				user.setUserId(rs.getInt("user_id"));
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setPassword(rs.getString("password"));
+				user.setRole(rs.getString("role"));
+				return user;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	public boolean createUser(User user) {
 		String sql = "insert into users (name, email, password,role) values (?,?,?,?)";
