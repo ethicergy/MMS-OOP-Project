@@ -6,6 +6,8 @@ import javax.swing.*;
 import com.mms.controllers.UserController;
 import com.mms.controllers.AuthenticationException;
 import com.mms.models.User;
+import com.mms.util.InputValidator;
+import com.mms.util.Logger;
 
 public class LoginFrame_1 extends JFrame {
     public LoginFrame_1() {
@@ -85,13 +87,21 @@ public class LoginFrame_1 extends JFrame {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             UserController userController = new UserController();
-            
+            // Use InputValidator for input checks
+            if (InputValidator.isNullOrEmpty(username) || InputValidator.isNullOrEmpty(password)) {
+                JOptionPane.showMessageDialog(LoginFrame_1.this, "Please enter both username and password.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             try {
                 User user = userController.authenticate(username, password);
                 JOptionPane.showMessageDialog(LoginFrame_1.this, "Login successful! Welcome, " + user.getName() + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
                 userController.rbacDirect(user, LoginFrame_1.this);
             } catch (AuthenticationException ex) {
+                Logger.log(ex);
                 JOptionPane.showMessageDialog(LoginFrame_1.this, ex.getMessage(), "Login Failed", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                Logger.log(ex);
+                JOptionPane.showMessageDialog(LoginFrame_1.this, "An unexpected error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         formPanel.add(loginBtn, gbc);

@@ -3,14 +3,15 @@ import java.util.List;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
-import com.mms.dao.MovieDAO;
 import com.mms.models.Movie;
-import com.mms.dao.ShowtimeDAO;
-import com.mms.models.Showtime;
+import com.mms.controllers.ShowtimeController;
+import com.mms.util.InputValidator;
+import com.mms.util.Logger;
 
 
 public class AddShowtimeDialog extends JDialog {
     Color bgColor = new Color(198, 172, 143);
+    private final ShowtimeController showtimeController = new ShowtimeController();
     public AddShowtimeDialog(JFrame parent) {
         super(parent, "Add New Showtime", true);
         setSize(650, 700);
@@ -18,8 +19,7 @@ public class AddShowtimeDialog extends JDialog {
         setResizable(false);
         getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(235, 224, 213)));
 
-        MovieDAO movieDAO = new MovieDAO();
-        java.util.List<Movie> movies = movieDAO.getAllMovies();
+        java.util.List<Movie> movies = showtimeController.getAllMovies();
         JComboBox<Movie> movieComboBox = new JComboBox<>();
         for (Movie movie : movies) {
             movieComboBox.addItem(movie);
@@ -181,49 +181,39 @@ public class AddShowtimeDialog extends JDialog {
             int numShows = (Integer) numShowsSpinner.getValue();
             int screenNumber = (Integer) screenSpinner.getValue();
 
-            if (selectedMovie == null || startDate == null || endDate == null || numShows < 1) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+            // Gather time fields
+            java.util.List<String> hours = new java.util.ArrayList<>();
+            java.util.List<String> minutes = new java.util.ArrayList<>();
+            java.util.List<String> amPm = new java.util.ArrayList<>();
+            for (int i = 0; i < numShows; i++) {
+                hours.add(hourFields.get(i).getText().trim());
+                minutes.add(minuteFields.get(i).getText().trim());
+                amPm.add((String) amPmFields.get(i).getSelectedItem());
             }
 
             java.time.LocalDate startLocalDate = new java.sql.Date(startDate.getTime()).toLocalDate();
             java.time.LocalDate endLocalDate = new java.sql.Date(endDate.getTime()).toLocalDate();
-            java.util.List<java.time.LocalTime> showTimes = new java.util.ArrayList<>();
-            for (int i = 0; i < numShows; i++) {
-                String hours = hourFields.get(i).getText().trim();
-                String minutes = minuteFields.get(i).getText().trim();
-                String amPm = (String) amPmFields.get(i).getSelectedItem();
-                if (hours.isEmpty() || minutes.isEmpty() || amPm == null) {
-                    JOptionPane.showMessageDialog(this, "Please fill in all show times.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                try {
-                    int hrs = Integer.parseInt(hours);
-                    int mins = Integer.parseInt(minutes);
-                    if (hrs < 1 || hrs > 12 || mins < 0 || mins > 59) {
-                        JOptionPane.showMessageDialog(this, "Invalid time format for show " + (i+1), "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    if (amPm.equals("PM") && hrs != 12) hrs += 12;
-                    if (amPm.equals("AM") && hrs == 12) hrs = 0;
-                    showTimes.add(java.time.LocalTime.of(hrs, mins));
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Please enter valid numbers for hours and minutes for show " + (i+1), "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            }
 
-            ShowtimeDAO showtimeDAO = new ShowtimeDAO();
-            int count = 0;
-            for (java.time.LocalDate date = startLocalDate; !date.isAfter(endLocalDate); date = date.plusDays(1)) {
-                for (java.time.LocalTime showTime : showTimes) {
-                    Showtime newShowtime = new Showtime(selectedMovie.getMovieId(), date, showTime, screenNumber);
-                    boolean success = showtimeDAO.createShowtime(newShowtime);
-                    if (success) count++;
-                }
+            // Use InputValidator for field checks
+            if (selectedMovie == null || InputValidator.isNullOrEmpty(hours.get(0)) || InputValidator.isNullOrEmpty(minutes.get(0))) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-            JOptionPane.showMessageDialog(this, count + " showtimes added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            dispose();
+            try {
+                java.util.List<java.time.LocalTime> showTimes = showtimeController.parseShowTimes(numShows, hours, minutes, amPm);
+                int count = showtimeController.createShowtimes(selectedMovie, startLocalDate, endLocalDate, screenNumber, showTimes);
+                JOptionPane.showMessageDialog(this, count + " showtimes added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } catch (NumberFormatException ex) {
+                Logger.log(ex);
+                JOptionPane.showMessageDialog(this, "Please enter valid numbers for hours and minutes.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                Logger.log(ex);
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                Logger.log(ex);
+                JOptionPane.showMessageDialog(this, "Error adding showtimes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         cancelButton.addActionListener(e -> dispose());
         setVisible(true);

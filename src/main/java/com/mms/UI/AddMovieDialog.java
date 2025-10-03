@@ -6,6 +6,8 @@ import com.mms.controllers.MovieController;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
+import com.mms.util.InputValidator;
+import com.mms.util.Logger;
 
 
 public class AddMovieDialog extends JDialog {
@@ -143,19 +145,20 @@ public class AddMovieDialog extends JDialog {
             String genre_var = genreField.getText().trim();
             String language = languageField.getText().trim();
             String certificate = certificateField.getText().trim();
-            if (!movieController.validateMovie(title, duration, genre_var, language, certificate)) {
+            // Use InputValidator for field checks
+            if (InputValidator.isNullOrEmpty(title) || InputValidator.isNullOrEmpty(duration) ||
+                InputValidator.isNullOrEmpty(genre_var) || InputValidator.isNullOrEmpty(language) ||
+                InputValidator.isNullOrEmpty(certificate)) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
-                int dur = movieController.validateDuration(duration);
+                int dur = Integer.parseInt(duration);
                 String posterUrl = posterField.getText().trim();
                 if (movie == null) {
-                    // Add new movie
                     movieController.createMovie(title, dur, genre_var, language, certificate, posterUrl);
                     JOptionPane.showMessageDialog(this, "Movie added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    // Edit existing movie
                     com.mms.models.Movie updatedMovie = new com.mms.models.Movie(movie.getMovieId(), title, dur, genre_var, language, certificate, posterUrl);
                     movieController.updateMovie(updatedMovie);
                     JOptionPane.showMessageDialog(this, "Movie updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -165,10 +168,13 @@ public class AddMovieDialog extends JDialog {
                 }
                 dispose();
             } catch (NumberFormatException ex) {
+                Logger.log(ex);
                 JOptionPane.showMessageDialog(this, "Duration must be a valid integer.", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (IllegalArgumentException ex) {
+                Logger.log(ex);
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
+                Logger.log(ex);
                 JOptionPane.showMessageDialog(this, "Error saving movie: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });

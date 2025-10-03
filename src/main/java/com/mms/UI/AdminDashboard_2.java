@@ -6,6 +6,8 @@ import java.util.List;
 import com.mms.controllers.MovieController;
 import com.mms.models.Movie;
 import java.awt.*;
+import com.mms.util.Logger;
+import com.mms.util.DateTimeUtils;
 
 public class AdminDashboard_2 extends JFrame {
 
@@ -153,48 +155,59 @@ public class AdminDashboard_2 extends JFrame {
     private DefaultTableModel tableModel;
 
     public JTable loadMovies(){
-        List<Movie> movies = movieController.getAllMovies();
-        String[] columns = {"Title", "Duration", "Language", "Actions", "MovieId"};
-        Object[][] data = new Object[movies.size()][5];
-        for (int i = 0; i < movies.size(); i++) {
-            Movie movie = movies.get(i);
-            String title = movie.getTitle();
-            String duration = movie.getDuration() + " mins";
-            String language = movie.getLanguage();
-            data[i] = new Object[]{title, duration, language, null, movie.getMovieId()};
-        }
-        tableModel = new DefaultTableModel(data, columns);
-        movieTable = new JTable(tableModel) {
-            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                Component c = super.prepareRenderer(renderer, row, column);
-                if (!isRowSelected(row)) {
-                    if (row % 2 == 0) {
-                        c.setBackground(new Color(198, 172, 143));
-                        c.setForeground(Color.white);
-                    } else {
-                        c.setBackground(new Color(234, 224, 213));
-                        c.setForeground(Color.black);
-                    }
-                } else {
-                    c.setBackground(new Color(201, 173, 167));
-                }
-                return c;
+        try {
+            List<Movie> movies = movieController.getAllMovies();
+            String[] columns = {"Title", "Duration", "Language", "Actions", "MovieId"};
+            Object[][] data = new Object[movies.size()][5];
+            for (int i = 0; i < movies.size(); i++) {
+                Movie movie = movies.get(i);
+                String title = movie.getTitle();
+                String duration = movie.getDuration() + " mins";
+                String language = movie.getLanguage();
+                data[i] = new Object[]{title, duration, language, null, movie.getMovieId()};
             }
-        };
-        movieTable.getColumnModel().getColumn(4).setMinWidth(0);
-        movieTable.getColumnModel().getColumn(4).setMaxWidth(0);
-        movieTable.getColumnModel().getColumn(4).setWidth(0);
-        return movieTable;
+            tableModel = new DefaultTableModel(data, columns);
+            movieTable = new JTable(tableModel) {
+                public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                    Component c = super.prepareRenderer(renderer, row, column);
+                    if (!isRowSelected(row)) {
+                        if (row % 2 == 0) {
+                            c.setBackground(new Color(198, 172, 143));
+                            c.setForeground(Color.white);
+                        } else {
+                            c.setBackground(new Color(234, 224, 213));
+                            c.setForeground(Color.black);
+                        }
+                    } else {
+                        c.setBackground(new Color(201, 173, 167));
+                    }
+                    return c;
+                }
+            };
+            movieTable.getColumnModel().getColumn(4).setMinWidth(0);
+            movieTable.getColumnModel().getColumn(4).setMaxWidth(0);
+            movieTable.getColumnModel().getColumn(4).setWidth(0);
+            return movieTable;
+        } catch (Exception ex) {
+            Logger.log(ex);
+            JOptionPane.showMessageDialog(this, "Error loading movies: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return new JTable();
+        }
     }
     
     public void refreshMovieTable() {
-        List<Movie> movies = movieController.getAllMovies();
-        tableModel.setRowCount(0); // Clear existing rows
-        for (Movie movie : movies) {
-            String title = movie.getTitle();
-            String duration = movie.getDuration() + " mins";
-            String language = movie.getLanguage();
-            tableModel.addRow(new Object[]{title, duration, language, null, movie.getMovieId()});
+        try {
+            List<Movie> movies = movieController.getAllMovies();
+            tableModel.setRowCount(0); // Clear existing rows
+            for (Movie movie : movies) {
+                String title = movie.getTitle();
+                String duration = movie.getDuration() + " mins";
+                String language = movie.getLanguage();
+                tableModel.addRow(new Object[]{title, duration, language, null, movie.getMovieId()});
+            }
+        } catch (Exception ex) {
+            Logger.log(ex);
+            JOptionPane.showMessageDialog(this, "Error refreshing movie table: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     // Editor
@@ -240,14 +253,18 @@ public class AdminDashboard_2 extends JFrame {
                     MovieController movieController = ((AdminDashboard_2) parentFrame).movieController;
                     Movie movie = movieController.getMovieById(movieid);
                     if (movie != null) {
-                        // Create callback for when movie is updated
                         Runnable updateCallback = () -> {
-                            Movie updatedMovie = movieController.getMovieById(movieid);
-                            if (parentFrame instanceof AdminDashboard_2) {
-                                tableModel.setValueAt(updatedMovie.getTitle(), row, 0);
-                                tableModel.setValueAt(updatedMovie.getDuration() + " mins", row, 1);
-                                tableModel.setValueAt(updatedMovie.getLanguage(), row, 2);
-                                ((AdminDashboard_2) parentFrame).refreshMovieTable();
+                            try {
+                                Movie updatedMovie = movieController.getMovieById(movieid);
+                                if (parentFrame instanceof AdminDashboard_2) {
+                                    tableModel.setValueAt(updatedMovie.getTitle(), row, 0);
+                                    tableModel.setValueAt(updatedMovie.getDuration() + " mins", row, 1);
+                                    tableModel.setValueAt(updatedMovie.getLanguage(), row, 2);
+                                    ((AdminDashboard_2) parentFrame).refreshMovieTable();
+                                }
+                            } catch (Exception ex) {
+                                Logger.log(ex);
+                                JOptionPane.showMessageDialog(parentFrame, "Error updating movie: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                             }
                         };
                         new AddMovieDialog(parentFrame, movie, updateCallback);
@@ -255,6 +272,7 @@ public class AdminDashboard_2 extends JFrame {
                         JOptionPane.showMessageDialog(parentFrame, "Movie not found!", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
+                    Logger.log(ex);
                     JOptionPane.showMessageDialog(parentFrame, "Error opening edit dialog: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
@@ -273,10 +291,12 @@ public class AdminDashboard_2 extends JFrame {
                             tableModel.removeRow(row);
                             JOptionPane.showMessageDialog(parentFrame, "Movie deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         } catch (Exception ex) {
+                            Logger.log(ex);
                             JOptionPane.showMessageDialog(parentFrame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } catch (Exception ex) {
+                    Logger.log(ex);
                     JOptionPane.showMessageDialog(parentFrame, "Error deleting movie: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
