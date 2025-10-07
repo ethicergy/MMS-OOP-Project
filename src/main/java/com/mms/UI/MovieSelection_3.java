@@ -33,7 +33,21 @@ public class MovieSelection_3 extends JFrame {
         JLabel titleLabel = new JLabel("NOW SHOWING: Book Your Movie", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 20, 0)); // spacing below title
-        
+        JPanel logbuttonPanel = new JPanel();
+        logbuttonPanel.setLayout(new BoxLayout(logbuttonPanel, BoxLayout.X_AXIS));
+        logbuttonPanel.setBackground(new Color(234, 224, 213));
+        JButton logoutBtn = new JButton("Logout");
+        logoutBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        logoutBtn.setBackground(new Color(34, 51, 59));
+        logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame_1();
+        });
+
+        logbuttonPanel.add(Box.createHorizontalGlue());
+        logbuttonPanel.add(logoutBtn);
+        logbuttonPanel.add(Box.createRigidArea(new Dimension(200, 0)));
         // Top panel: Title + Date Selection
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(bgColor);
@@ -41,34 +55,24 @@ public class MovieSelection_3 extends JFrame {
         
         JPanel dateSelectionPanel = createDateSelectionPanel();
         topPanel.add(dateSelectionPanel, BorderLayout.SOUTH);
+        topPanel.add(logbuttonPanel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
 
         // Movie list panel
         movieListPanel = new JPanel();
         movieListPanel.setLayout(new BoxLayout(movieListPanel, BoxLayout.Y_AXIS));
         movieListPanel.setBackground(bgColor);
-
+        
         // Load movies for today initially
         refreshMoviesForDate(LocalDate.now());
-
-        /*
-        movieListPanel.add(createMovieRow("Inception", "2h 28m", "English", "Inception.jpg", rowColor1));
-        movieListPanel.add(Box.createVerticalStrut(8));
-        movieListPanel.add(createMovieRow("Lokah: Chapter 1", "2h 29m", "Malayalam", "lokah Chapter 1.jpg", rowColor2));
-        movieListPanel.add(Box.createVerticalStrut(8));
-        movieListPanel.add(createMovieRow("Hridayapoorvam", "2h 31m", "Malayalam", "Hridayapoorvam.jpg", rowColor1));
-        movieListPanel.add(Box.createVerticalStrut(8));
-        movieListPanel.add(createMovieRow("F1: The Movie", "2h 35m", "English", "F1 The Movie.jpg", rowColor2));
-        */
         // Container with optimized margins for larger movie boxes
         JScrollPane scrollPane = new JScrollPane(movieListPanel);
-scrollPane.setBackground(bgColor);
-scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60)); // Reduced side margins to fit larger boxes
-scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBackground(bgColor);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60)); // Reduced side margins to fit larger boxes
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-add(scrollPane, BorderLayout.CENTER);
-
+        add(scrollPane, BorderLayout.CENTER);
         setLocationRelativeTo(null);
         setVisible(true);
     }
