@@ -20,10 +20,23 @@ public class AddShowtimeDialog extends JDialog {
         getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(235, 224, 213)));
 
         java.util.List<Movie> movies = showtimeController.getAllMovies();
-        JComboBox<String> movieComboBox = new JComboBox<>();
+        JComboBox<Movie> movieComboBox = new JComboBox<>();
         for (Movie movie : movies) {
-            movieComboBox.addItem(movie.getTitle());
+            movieComboBox.addItem(movie);
         }
+        // Set custom renderer to display movie titles
+        movieComboBox.setRenderer(new javax.swing.DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(
+                    javax.swing.JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Movie) {
+                    setText(((Movie) value).getTitle());
+                }
+                return this;
+            }
+        });
 
         JLabel movieLabel = new JLabel("Select Movie:");
         JLabel startDateLabel = new JLabel("Start Date:");

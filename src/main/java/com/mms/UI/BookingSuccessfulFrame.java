@@ -32,8 +32,11 @@ public class BookingSuccessfulFrame extends JFrame {
         getContentPane().setBackground(BG);
 
         BookingSummary summary = null;
+        java.awt.image.BufferedImage qrImage = null;
+        BookingController bookingController = new BookingController();
         try {
-            summary = new BookingController().getBookingSummary(movie, showtime, seats, totalPrice);
+            summary = bookingController.getBookingSummary(movie, showtime, seats, totalPrice);
+            qrImage = bookingController.generateBookingQRCode(movie, showtime, seats, totalPrice);
         } catch (Exception ex) {
             Logger.log(ex);
             JOptionPane.showMessageDialog(this, "Error generating booking summary: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -64,13 +67,19 @@ public class BookingSuccessfulFrame extends JFrame {
             // If image fails, just skip the tick mark
         }
 
+        // Main container for booking details and QR code
+        JPanel mainDetailsPanel = new JPanel(new BorderLayout(20, 0));
+        mainDetailsPanel.setOpaque(false);
+        mainDetailsPanel.setPreferredSize(new Dimension(900, 400));
+
+        // Left panel: Booking details
         JPanel rectPanel = new JPanel(new GridBagLayout());
         rectPanel.setBackground(RECT);
         rectPanel.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(BORDER, 2),
                 new EmptyBorder(25, 40, 25, 40)
         ));
-        rectPanel.setPreferredSize(new Dimension(700, 400));
+        rectPanel.setPreferredSize(new Dimension(500, 400));
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 22);
         Font valueFont = new Font("SansSerif", Font.PLAIN, 22);
@@ -91,11 +100,62 @@ public class BookingSuccessfulFrame extends JFrame {
         r.gridy++;
         rectPanel.add(createRow("Total Price:", summary.totalPriceDisplay, labelFont, totalFont), r);
 
+        // Right panel: QR Code
+        JPanel qrPanel = new JPanel(new BorderLayout());
+        qrPanel.setOpaque(false);
+        qrPanel.setPreferredSize(new Dimension(280, 400));
+        
+        JLabel qrTitle = new JLabel("<html><center>Scan QR Code<br><small>for Ticket Details</small></center></html>", SwingConstants.CENTER);
+        qrTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        qrTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        
+        JLabel qrLabel = new JLabel();
+        if (qrImage != null) {
+            // Scale the QR code image to fit better
+            Image scaledQR = qrImage.getScaledInstance(180, 180, Image.SCALE_SMOOTH);
+            qrLabel.setIcon(new ImageIcon(scaledQR));
+            qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            
+            // Add click functionality to show QR code details
+            qrLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+            qrLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    String details = bookingController.getBookingDetailsString(movie, showtime, seats, totalPrice);
+                    JOptionPane.showMessageDialog(BookingSuccessfulFrame.this, 
+                        "<html><pre>" + details.replace("\n", "<br>") + "</pre></html>", 
+                        "QR Code Content", 
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+        } else {
+            qrLabel.setText("<html><center>QR Code<br>Not Available</center></html>");
+            qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        }
+        
+        qrLabel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER, 2),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        
+        // Add a small instruction label
+        JLabel instructionLabel = new JLabel("<html><center><small>Click QR code to view details</small></center></html>", SwingConstants.CENTER);
+        instructionLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
+        instructionLabel.setForeground(new Color(100, 100, 100));
+        
+        qrPanel.add(qrTitle, BorderLayout.NORTH);
+        qrPanel.add(qrLabel, BorderLayout.CENTER);
+        qrPanel.add(instructionLabel, BorderLayout.SOUTH);
+
+        // Add both panels to main container
+        mainDetailsPanel.add(rectPanel, BorderLayout.WEST);
+        mainDetailsPanel.add(qrPanel, BorderLayout.EAST);
+
         g.gridy = 1;
-        center.add(rectPanel, g);
+        center.add(mainDetailsPanel, g);
         add(center, BorderLayout.CENTER);
 
-        JPanel bottom = new JPanel(new GridBagLayout());
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         bottom.setBackground(BG);
         bottom.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
 
@@ -105,8 +165,48 @@ public class BookingSuccessfulFrame extends JFrame {
         downloadBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
         downloadBtn.setFocusPainted(false);
         downloadBtn.setPreferredSize(new Dimension(280, 50));
+        downloadBtn.addActionListener(e -> {
+            // Show booking details as formatted text (can be enhanced to actual PDF generation)
+            String details = bookingController.getBookingDetailsString(movie, showtime, seats, totalPrice);
+            
+            // Create a dialog with better formatting
+            JDialog detailsDialog = new JDialog(this, "Ticket Details", true);
+            detailsDialog.setSize(400, 350);
+            detailsDialog.setLocationRelativeTo(this);
+            
+            JTextArea textArea = new JTextArea(details);
+            textArea.setEditable(false);
+            textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            textArea.setBackground(new Color(248, 249, 250));
+            textArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+            
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            
+            JButton closeBtn = new JButton("Close");
+            closeBtn.addActionListener(evt -> detailsDialog.dispose());
+            
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.add(closeBtn);
+            
+            detailsDialog.add(scrollPane, BorderLayout.CENTER);
+            detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
+            detailsDialog.setVisible(true);
+        });
+
+        JButton returnBtn = new JButton("Return to Movies");
+        returnBtn.setBackground(new Color(108, 117, 125));
+        returnBtn.setForeground(Color.WHITE);
+        returnBtn.setFont(new Font("SansSerif", Font.BOLD, 18));
+        returnBtn.setFocusPainted(false);
+        returnBtn.setPreferredSize(new Dimension(200, 50));
+        returnBtn.addActionListener(e -> {
+            this.dispose();
+            new MovieSelection_3().setVisible(true);
+        });
 
         bottom.add(downloadBtn);
+        bottom.add(returnBtn);
         add(bottom, BorderLayout.SOUTH);
 
         setVisible(true);
