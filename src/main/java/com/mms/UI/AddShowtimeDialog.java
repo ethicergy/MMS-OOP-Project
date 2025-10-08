@@ -20,9 +20,9 @@ public class AddShowtimeDialog extends JDialog {
         getRootPane().setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(235, 224, 213)));
 
         java.util.List<Movie> movies = showtimeController.getAllMovies();
-        JComboBox<Movie> movieComboBox = new JComboBox<>();
+        JComboBox<String> movieComboBox = new JComboBox<>();
         for (Movie movie : movies) {
-            movieComboBox.addItem(movie);
+            movieComboBox.addItem(movie.getTitle());
         }
 
         JLabel movieLabel = new JLabel("Select Movie:");
