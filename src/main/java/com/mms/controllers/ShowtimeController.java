@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ShowtimeController {
+public class ShowtimeController extends BaseController {
 	private final MovieDAO movieDAO;
 	private final ShowtimeDAO showtimeDAO;
 
@@ -57,5 +57,18 @@ public class ShowtimeController {
 			}
 		}
 		return count;
+	}
+	/**
+	 * Returns all showtimes for a given movie ID.
+	 */
+	public List<Showtime> getShowtimesForMovie(int movieId) {
+		return showtimeDAO.getShowtimesByMovieId(movieId);
+	}
+
+	/**
+	 * Deletes a showtime by its ID. Returns true if successful, false otherwise.
+	 */
+	public boolean deleteShowtime(int showtimeId) {
+		return showtimeDAO.deleteShowtime(showtimeId);
 	}
 }

@@ -7,7 +7,7 @@ import com.mms.models.Bookings;
 import java.util.List;
 import java.util.ArrayList;
 
-public class SeatController {
+public class SeatController extends BaseController {
     private SeatDAO seatDAO;
     private BookingDAO bookingDAO;
     
