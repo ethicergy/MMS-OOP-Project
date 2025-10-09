@@ -242,13 +242,149 @@ public class SeatSelection_4 extends JFrame {
 
         private final List<Seat> seats = new ArrayList<>();
 
-        enum SeatState { AVAILABLE, SELECTED, BOOKED }
-
-        static class Seat {
-            Rectangle bounds;
-            String label;
-            SeatState state;
-            Seat(Rectangle r, String label, SeatState s) { this.bounds = r; this.label = label; this.state = s; }
+        // Base Seat class - defines common properties and behavior
+        abstract static class Seat {
+            protected Rectangle bounds;
+            protected String label;
+            protected final int SEAT_SIZE = 40;
+            protected final int CORNER_RADIUS = 8;
+            
+            public Seat(Rectangle bounds, String label) {
+                this.bounds = bounds;
+                this.label = label;
+            }
+            
+            // Abstract methods that subclasses must implement
+            public abstract Color getFillColor();
+            public abstract Color getBorderColor();
+            public abstract boolean isClickable();
+            public abstract Seat onClick(); // Returns new seat state after click
+            
+            // Common drawing method used by all seat types
+            public void draw(Graphics2D g2) {
+                // Draw seat shape
+                RoundRectangle2D rr = new RoundRectangle2D.Double(
+                    bounds.x, bounds.y, bounds.width, bounds.height, 
+                    CORNER_RADIUS, CORNER_RADIUS
+                );
+                
+                // Fill seat
+                g2.setColor(getFillColor());
+                g2.fill(rr);
+                
+                // Draw border
+                g2.setColor(getBorderColor());
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.draw(rr);
+                
+                // Draw label
+                drawLabel(g2);
+            }
+            
+            protected void drawLabel(Graphics2D g2) {
+                g2.setFont(new Font("Arial", Font.BOLD, 12));
+                FontMetrics fm = g2.getFontMetrics();
+                int strW = fm.stringWidth(label);
+                int strH = fm.getAscent();
+                int sx = bounds.x + (bounds.width - strW) / 2;
+                int sy = bounds.y + (bounds.height + strH) / 2 - 2;
+                
+                g2.setColor(getLabelColor());
+                g2.drawString(label, sx, sy);
+            }
+            
+            protected Color getLabelColor() {
+                return Color.BLACK;
+            }
+            
+            // Common utility methods
+            public boolean contains(Point point) {
+                return bounds.contains(point);
+            }
+            
+            public Rectangle getBounds() { return bounds; }
+            public String getLabel() { return label; }
+        }
+        
+        // Available seat - can be selected by users
+        static class AvailableSeat extends Seat {
+            public AvailableSeat(Rectangle bounds, String label) {
+                super(bounds, label);
+            }
+            
+            @Override
+            public Color getFillColor() {
+                return new Color(40, 167, 69); // Green for available
+            }
+            
+            @Override
+            public Color getBorderColor() {
+                return Color.DARK_GRAY;
+            }
+            
+            @Override
+            public boolean isClickable() {
+                return true;
+            }
+            
+            @Override
+            public Seat onClick() {
+                return new SelectedSeat(bounds, label); // Convert to selected
+            }
+        }
+        
+        // Selected seat - currently selected by user
+        static class SelectedSeat extends Seat {
+            public SelectedSeat(Rectangle bounds, String label) {
+                super(bounds, label);
+            }
+            
+            @Override
+            public Color getFillColor() {
+                return new Color(255, 193, 7); // Yellow/amber for selected
+            }
+            
+            @Override
+            public Color getBorderColor() {
+                return Color.DARK_GRAY;
+            }
+            
+            @Override
+            public boolean isClickable() {
+                return true;
+            }
+            
+            @Override
+            public Seat onClick() {
+                return new AvailableSeat(bounds, label); // Convert back to available
+            }
+        }
+        
+        // Booked seat - cannot be selected
+        static class BookedSeat extends Seat {
+            public BookedSeat(Rectangle bounds, String label) {
+                super(bounds, label);
+            }
+            
+            @Override
+            public Color getFillColor() {
+                return new Color(220, 53, 69); // Red for booked
+            }
+            
+            @Override
+            public Color getBorderColor() {
+                return Color.DARK_GRAY;
+            }
+            
+            @Override
+            public boolean isClickable() {
+                return false; // Booked seats cannot be clicked
+            }
+            
+            @Override
+            public Seat onClick() {
+                return this; // No change for booked seats
+            }
         }
 
         ScalableSeatPanel(int baseWidth) {
@@ -271,15 +407,10 @@ public class SeatSelection_4 extends JFrame {
                 public void mouseClicked(MouseEvent e) {
                     Point p = toDesignCoords(e.getPoint());
                     if (p == null) return;
-                    for (Seat s : seats) {
-                        if (s.bounds.contains(p)) {
-                            if (s.state == SeatState.BOOKED) {
-                                // ignore booked seats
-                            } else if (s.state == SeatState.AVAILABLE) {
-                                s.state = SeatState.SELECTED;
-                            } else if (s.state == SeatState.SELECTED) {
-                                s.state = SeatState.AVAILABLE;
-                            }
+                    for (int i = 0; i < seats.size(); i++) {
+                        Seat s = seats.get(i);
+                        if (s.contains(p) && s.isClickable()) {
+                            seats.set(i, s.onClick());
                             repaint();
                             break;
                         }
@@ -331,7 +462,7 @@ public class SeatSelection_4 extends JFrame {
                 String label = "A" + (c + 1);
                 int x = topX + c * (seatSize + seatGap);
                 int y = topY;
-                seats.add(new Seat(new Rectangle(x, y, seatSize, seatSize), label, SeatState.AVAILABLE));
+                seats.add(new AvailableSeat(new Rectangle(x, y, seatSize, seatSize), label));
             }
 
             // Middle (upper) blocks: left 5x7, center 6x7, right 5x6
@@ -372,7 +503,7 @@ public class SeatSelection_4 extends JFrame {
                             String label = String.valueOf(rowChar) + seatNumberAcross;
                             int x = blockX + c * (seatSize + seatGap);
                             int y = midY + r * (seatSize + seatGap);
-                            seats.add(new Seat(new Rectangle(x, y, seatSize, seatSize), label, SeatState.AVAILABLE));
+                            seats.add(new AvailableSeat(new Rectangle(x, y, seatSize, seatSize), label));
                         }
                     }
                     cumulativeIndex += cols;
@@ -415,7 +546,7 @@ public class SeatSelection_4 extends JFrame {
                             String label = String.valueOf(rowChar) + seatNumberAcross;
                             int x = blockX + c * (seatSize + seatGap);
                             int y = botY + r * (seatSize + seatGap);
-                            seats.add(new Seat(new Rectangle(x, y, seatSize, seatSize), label, SeatState.AVAILABLE));
+                            seats.add(new AvailableSeat(new Rectangle(x, y, seatSize, seatSize), label));
                         }
                     }
                     cumulativeIndex += cols;
@@ -428,7 +559,7 @@ public class SeatSelection_4 extends JFrame {
             int botH = botRowsMax * seatSize + (botRowsMax - 1) * seatGap;
             baseH = topMargin + topBlockH + rowGap + midH + rowGap + botH + bottomPadding;
             // Booked seats will be loaded by loadBookedSeatsFromDatabase() if showtime ID is provided
-            // No hardcoded booked seats needed anymore
+            
         }
         
         private void loadBookedSeatsFromDatabase(int showtimeId) {
@@ -447,9 +578,10 @@ public class SeatSelection_4 extends JFrame {
 
         private void markBooked(String... labels) {
             for (String lbl : labels) {
-                for (Seat s : seats) {
+                for (int i = 0; i < seats.size(); i++) {
+                    Seat s = seats.get(i);
                     if (s.label.equals(lbl)) {
-                        s.state = SeatState.BOOKED;
+                        seats.set(i, new BookedSeat(s.bounds, s.label));
                     }
                 }
             }
@@ -476,30 +608,9 @@ public class SeatSelection_4 extends JFrame {
             g2.setColor(new Color(198, 172, 143));
             g2.fillRect(0, 0, baseW, baseH);
 
-            // draw seats
+            // draw seats using inheritance
             for (Seat s : seats) {
-                Color fill;
-                switch (s.state) {
-                    case BOOKED: fill = new Color(220, 53, 69); break;
-                    case SELECTED: fill = new Color(255, 193, 7); break;
-                    default: fill = new Color(40, 167, 69);
-                }
-                RoundRectangle2D rr = new RoundRectangle2D.Double(s.bounds.x, s.bounds.y, s.bounds.width, s.bounds.height, 8, 8);
-                g2.setColor(fill);
-                g2.fill(rr);
-                g2.setColor(Color.DARK_GRAY);
-                g2.setStroke(new BasicStroke(1.2f));
-                g2.draw(rr);
-
-                // optional label inside seat
-                g2.setFont(new Font("Arial", Font.BOLD, 12));
-                FontMetrics fm = g2.getFontMetrics();
-                int strW = fm.stringWidth(s.label);
-                int strH = fm.getAscent();
-                int sx = s.bounds.x + (s.bounds.width - strW) / 2;
-                int sy = s.bounds.y + (s.bounds.height + strH) / 2 - 2;
-                g2.setColor(Color.BLACK);
-                g2.drawString(s.label, sx, sy);
+                s.draw(g2);
             }
 
             // draw screen bar near bottom of seat area
@@ -523,7 +634,9 @@ public class SeatSelection_4 extends JFrame {
         List<String> getSelectedSeatLabels() {
             List<String> out = new ArrayList<>();
             for (Seat s : seats) {
-                if (s.state == SeatState.SELECTED) out.add(s.label);
+                if (s instanceof SelectedSeat) {
+                    out.add(s.label);
+                }
             }
             return out;
         }
