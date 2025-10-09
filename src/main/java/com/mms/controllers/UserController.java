@@ -5,7 +5,7 @@ import com.mms.models.User;
 import com.mms.UI.AdminDashboard_2;
 import com.mms.UI.MovieSelection_3;
 
-public class UserController {
+public class UserController extends BaseController {
     private UserDAO userDAO;
 
     public UserController() {

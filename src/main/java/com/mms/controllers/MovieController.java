@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
 
-public class MovieController {
+public class MovieController extends BaseController {
     /**
      * Returns a map of Movie to its list of showtimes for a given date.
      * Only movies with at least one showtime on that date are included.
@@ -50,8 +50,16 @@ public class MovieController {
      * Validates movie input fields
      */
     public boolean validateMovie(String title, String duration, String genre, String language, String certificate) {
-        return !title.isEmpty() && !duration.isEmpty() && !genre.isEmpty() 
-               && !language.isEmpty() && !certificate.isEmpty();
+        try {
+            validateNotEmpty(title, "Title");
+            validateNotEmpty(duration, "Duration");
+            validateNotEmpty(genre, "Genre");
+            validateNotEmpty(language, "Language");
+            validateNotEmpty(certificate, "Certificate");
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**
@@ -69,16 +77,15 @@ public class MovieController {
      * Handles poster image upload
      */
     public String uploadPosterImage(File selectedFile) throws IOException {
+        validateNotNull(selectedFile, "Selected file");
         // Create images directory if it doesn't exist
         File imagesDir = new File("./images");
         if (!imagesDir.exists()) {
             imagesDir.mkdirs();
         }
-        
         String fileName = selectedFile.getName();
         File dest = new File("./images/" + fileName);
         Files.copy(selectedFile.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        
         return "images/" + fileName;
     }
 
@@ -96,6 +103,7 @@ public class MovieController {
      * Updates an existing movie
      */
     public Movie updateMovie(Movie movie) {
+        validateNotNull(movie, "Movie");
         movieDAO.updateMovie(movie);
         return movie;
     }
@@ -111,6 +119,9 @@ public class MovieController {
      * Gets a movie by ID
      */
     public Movie getMovieById(int movieId) {
+        if (!isValidId(movieId)) {
+            throw new IllegalArgumentException("Invalid movie ID");
+        }
         return movieDAO.getMoviebyId(movieId);
     }
 
