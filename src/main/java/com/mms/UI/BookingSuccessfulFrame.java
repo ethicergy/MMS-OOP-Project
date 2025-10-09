@@ -32,11 +32,11 @@ public class BookingSuccessfulFrame extends JFrame {
         getContentPane().setBackground(BG);
 
         BookingSummary summary = null;
-        java.awt.image.BufferedImage qrImage = null;
+        final java.awt.image.BufferedImage[] qrImageHolder = new java.awt.image.BufferedImage[1];
         BookingController bookingController = new BookingController();
         try {
             summary = bookingController.getBookingSummary(movie, showtime, seats, totalPrice);
-            qrImage = bookingController.generateBookingQRCode(movie, showtime, seats, totalPrice);
+            qrImageHolder[0] = bookingController.generateBookingQRCode(movie, showtime, seats, totalPrice);
         } catch (Exception ex) {
             Logger.log(ex);
             JOptionPane.showMessageDialog(this, "Error generating booking summary: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -67,10 +67,15 @@ public class BookingSuccessfulFrame extends JFrame {
             // If image fails, just skip the tick mark
         }
 
-        // Main container for booking details and QR code
-        JPanel mainDetailsPanel = new JPanel(new BorderLayout(20, 0));
+        // Main container for booking details and QR code using GridBagLayout for better control
+        JPanel mainDetailsPanel = new JPanel(new GridBagLayout());
         mainDetailsPanel.setOpaque(false);
-        mainDetailsPanel.setPreferredSize(new Dimension(900, 400));
+        mainDetailsPanel.setPreferredSize(new Dimension(1000, 420));
+
+        GridBagConstraints mainGbc = new GridBagConstraints();
+        mainGbc.insets = new Insets(0, 10, 0, 10);
+        mainGbc.anchor = GridBagConstraints.CENTER;
+        mainGbc.fill = GridBagConstraints.BOTH;
 
         // Left panel: Booking details
         JPanel rectPanel = new JPanel(new GridBagLayout());
@@ -79,7 +84,8 @@ public class BookingSuccessfulFrame extends JFrame {
                 new LineBorder(BORDER, 2),
                 new EmptyBorder(25, 40, 25, 40)
         ));
-        rectPanel.setPreferredSize(new Dimension(500, 400));
+        rectPanel.setPreferredSize(new Dimension(650, 400));
+        rectPanel.setMinimumSize(new Dimension(650, 400));
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 22);
         Font valueFont = new Font("SansSerif", Font.PLAIN, 22);
@@ -102,19 +108,26 @@ public class BookingSuccessfulFrame extends JFrame {
 
         // Right panel: QR Code
         JPanel qrPanel = new JPanel(new BorderLayout());
-        qrPanel.setOpaque(false);
-        qrPanel.setPreferredSize(new Dimension(280, 400));
+        qrPanel.setBackground(BG);
+        qrPanel.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER, 2),
+            new EmptyBorder(20, 20, 20, 20)
+        ));
+        qrPanel.setPreferredSize(new Dimension(320, 400));
+        qrPanel.setMinimumSize(new Dimension(320, 400));
         
-        JLabel qrTitle = new JLabel("<html><center>Scan QR Code<br><small>for Ticket Details</small></center></html>", SwingConstants.CENTER);
+        JLabel qrTitle = new JLabel("<html><center><b>Scan QR Code</b><br><small>for Ticket Details</small></center></html>", SwingConstants.CENTER);
         qrTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
-        qrTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        qrTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
         JLabel qrLabel = new JLabel();
-        if (qrImage != null) {
+        qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        qrLabel.setVerticalAlignment(SwingConstants.CENTER);
+        
+        if (qrImageHolder[0] != null) {
             // Scale the QR code image to fit better
-            Image scaledQR = qrImage.getScaledInstance(180, 180, Image.SCALE_SMOOTH);
+            Image scaledQR = qrImageHolder[0].getScaledInstance(200, 200, Image.SCALE_SMOOTH);
             qrLabel.setIcon(new ImageIcon(scaledQR));
-            qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
             
             // Add click functionality to show QR code details
             qrLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -129,17 +142,12 @@ public class BookingSuccessfulFrame extends JFrame {
                 }
             });
         } else {
-            qrLabel.setText("<html><center>QR Code<br>Not Available</center></html>");
-            qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            qrLabel.setText("<html><center><font size='4'>QR Code<br>Not Available</font></center></html>");
+            qrLabel.setPreferredSize(new Dimension(200, 200));
         }
         
-        qrLabel.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(BORDER, 2),
-            new EmptyBorder(15, 15, 15, 15)
-        ));
-        
         // Add a small instruction label
-        JLabel instructionLabel = new JLabel("<html><center><small>Click QR code to view details</small></center></html>", SwingConstants.CENTER);
+        JLabel instructionLabel = new JLabel("<html><center><small><i>Click QR code to view details</i></small></center></html>", SwingConstants.CENTER);
         instructionLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
         instructionLabel.setForeground(new Color(100, 100, 100));
         
@@ -147,9 +155,16 @@ public class BookingSuccessfulFrame extends JFrame {
         qrPanel.add(qrLabel, BorderLayout.CENTER);
         qrPanel.add(instructionLabel, BorderLayout.SOUTH);
 
-        // Add both panels to main container
-        mainDetailsPanel.add(rectPanel, BorderLayout.WEST);
-        mainDetailsPanel.add(qrPanel, BorderLayout.EAST);
+        // Add both panels to main container with proper spacing
+        mainGbc.gridx = 0;
+        mainGbc.gridy = 0;
+        mainGbc.weightx = 0.65;
+        mainDetailsPanel.add(rectPanel, mainGbc);
+        
+        mainGbc.gridx = 1;
+        mainGbc.gridy = 0;
+        mainGbc.weightx = 0.35;
+        mainDetailsPanel.add(qrPanel, mainGbc);
 
         g.gridy = 1;
         center.add(mainDetailsPanel, g);
@@ -166,32 +181,82 @@ public class BookingSuccessfulFrame extends JFrame {
         downloadBtn.setFocusPainted(false);
         downloadBtn.setPreferredSize(new Dimension(280, 50));
         downloadBtn.addActionListener(e -> {
-            // Show booking details as formatted text (can be enhanced to actual PDF generation)
-            String details = bookingController.getBookingDetailsString(movie, showtime, seats, totalPrice);
+            // Create file chooser for PDF save location
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Ticket as PDF");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             
-            // Create a dialog with better formatting
-            JDialog detailsDialog = new JDialog(this, "Ticket Details", true);
-            detailsDialog.setSize(400, 350);
-            detailsDialog.setLocationRelativeTo(this);
+            // Set default filename with movie title and timestamp
+            String defaultFilename = "Ticket_" + movie.getTitle().replaceAll("[^a-zA-Z0-9]", "_") + 
+                                   "_" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + 
+                                   ".pdf";
+            fileChooser.setSelectedFile(new java.io.File(defaultFilename));
             
-            JTextArea textArea = new JTextArea(details);
-            textArea.setEditable(false);
-            textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            textArea.setBackground(new Color(248, 249, 250));
-            textArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+            // Set file filter for PDF files
+            javax.swing.filechooser.FileNameExtensionFilter pdfFilter = 
+                new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents (*.pdf)", "pdf");
+            fileChooser.setFileFilter(pdfFilter);
             
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            
-            JButton closeBtn = new JButton("Close");
-            closeBtn.addActionListener(evt -> detailsDialog.dispose());
-            
-            JPanel buttonPanel = new JPanel();
-            buttonPanel.add(closeBtn);
-            
-            detailsDialog.add(scrollPane, BorderLayout.CENTER);
-            detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
-            detailsDialog.setVisible(true);
+            int result = fileChooser.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+                
+                // Ensure .pdf extension
+                String tempPath = selectedFile.getAbsolutePath();
+                if (!tempPath.toLowerCase().endsWith(".pdf")) {
+                    tempPath += ".pdf";
+                }
+                final String filePath = tempPath;
+                
+                // Generate PDF in background to avoid UI freezing
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        // Show progress dialog
+                        JDialog progressDialog = new JDialog(this, "Generating PDF", true);
+                        progressDialog.setSize(300, 100);
+                        progressDialog.setLocationRelativeTo(this);
+                        progressDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+                        
+                        JLabel progressLabel = new JLabel("Generating PDF ticket...", SwingConstants.CENTER);
+                        progressDialog.add(progressLabel);
+                        
+                        // Show progress dialog in separate thread
+                        Thread progressThread = new Thread(() -> progressDialog.setVisible(true));
+                        progressThread.start();
+                        
+                        // Generate PDF
+                        com.mms.util.PDFGenerator.generateTicketPDF(filePath, movie, showtime, seats, totalPrice, qrImageHolder[0]);
+                        
+                        // Close progress dialog
+                        progressDialog.dispose();
+                        
+                        // Show success message
+                        int openResult = JOptionPane.showConfirmDialog(this,
+                            "PDF ticket generated successfully!\nSaved to: " + filePath + "\n\nWould you like to open the file?",
+                            "PDF Generated",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE);
+                        
+                        if (openResult == JOptionPane.YES_OPTION) {
+                            try {
+                                java.awt.Desktop.getDesktop().open(new java.io.File(filePath));
+                            } catch (Exception openEx) {
+                                JOptionPane.showMessageDialog(this,
+                                    "PDF generated but couldn't open automatically.\nFile saved to: " + filePath,
+                                    "File Saved",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        }
+                        
+                    } catch (Exception ex) {
+                        Logger.log(ex);
+                        JOptionPane.showMessageDialog(this,
+                            "Error generating PDF: " + ex.getMessage(),
+                            "PDF Generation Failed",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+            }
         });
 
         JButton returnBtn = new JButton("Return to Movies");
