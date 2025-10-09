@@ -24,6 +24,19 @@ public class AddShowtimeDialog extends JDialog {
         for (Movie movie : movies) {
             movieComboBox.addItem(movie);
         }
+        // Set custom renderer to display movie titles
+        movieComboBox.setRenderer(new javax.swing.DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(
+                    javax.swing.JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Movie) {
+                    setText(((Movie) value).getTitle());
+                }
+                return this;
+            }
+        });
 
         JLabel movieLabel = new JLabel("Select Movie:");
         JLabel startDateLabel = new JLabel("Start Date:");

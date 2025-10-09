@@ -180,16 +180,9 @@ public class SeatSelection_4 extends JFrame {
                 java.math.BigDecimal.valueOf(pricePerSeat)
             );
             if (success) {
-                JOptionPane.showMessageDialog(this,
-                    "<html><h3>Booking Confirmed!</h3>" +
-                    "Your booking has been successfully created.<br>" +
-                    "Booking Details:<br>" +
-                    "<b>Seats:</b> " + String.join(", ", selectedSeats) + "<br>" +
-                    "<b>Total Amount:</b> ₹" + totalPrice + "<br><br>" +
-                    "Thank you for choosing our cinema!</html>",
-                    "Booking Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-                returnToMovieSelection();
+                // Close this frame and open BookingSuccessfulFrame
+                this.dispose();
+                new BookingSuccessfulFrame(selectedMovie, selectedShowtime, selectedSeats, totalPrice);
             } else {
                 JOptionPane.showMessageDialog(this,
                     "<html><h3>Booking Failed</h3>" +
