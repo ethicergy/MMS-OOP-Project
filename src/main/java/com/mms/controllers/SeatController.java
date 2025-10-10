@@ -18,6 +18,8 @@ public class SeatController extends BaseController {
     
     /**
      * Gets available seats for a specific showtime
+     * @param showtimeId The ID of the showtime
+     * @return List of available seats
      */
     public List<Seat> getAvailableSeats(int showtimeId) {
         List<Seat> allSeats = seatDAO.getSeatsByShowtime(showtimeId);
@@ -42,6 +44,9 @@ public class SeatController extends BaseController {
     
     /**
      * Checks if seats are available for booking
+     * @param seatIds List of seat IDs to check
+     * @param showtimeId The ID of the showtime
+     * @return true if all seats are available, false otherwise
      */
     public boolean areSeatsAvailable(List<Integer> seatIds, int showtimeId) {
         List<Seat> availableSeats = getAvailableSeats(showtimeId);
@@ -56,6 +61,8 @@ public class SeatController extends BaseController {
     
     /**
      * Gets seat by seat ID
+     * @param seatId The ID of the seat
+     * @return The Seat object if found, null otherwise
      */
     public Seat getSeatById(int seatId) {
         return seatDAO.getSeatById(seatId);
@@ -63,6 +70,11 @@ public class SeatController extends BaseController {
     
     /**
      * Creates a new seat
+     * @param showtimeId The ID of the showtime
+     * @param seatRow The row of the seat 
+     * @param seatCol The column number of the seat 
+     * @param status The status of the seat 
+     * @return The created Seat object
      */
     public Seat createSeat(int showtimeId, String seatRow, int seatCol, String status) {
         Seat seat = new Seat(showtimeId, seatRow, seatCol, status);
@@ -72,6 +84,8 @@ public class SeatController extends BaseController {
     
     /**
      * Updates seat status
+     * @param seatId The ID of the seat
+     * @param status The new status of the seat
      */
     public void updateSeatStatus(int seatId, String status) {
         seatDAO.updateSeatStatus(seatId, status);
@@ -79,6 +93,7 @@ public class SeatController extends BaseController {
     
     /**
      * Ensures seats exist for a showtime (creates them if they don't exist)
+     * @param showtimeId The ID of the showtime
      */
     public void ensureSeatsForShowtime(int showtimeId) {
         seatDAO.ensureSeatsForShowtime(showtimeId);
