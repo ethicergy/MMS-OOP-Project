@@ -16,7 +16,9 @@ public class UserController extends BaseController {
 
     /**
      * Authenticates a user by username and password.
-     * Throws AuthenticationException if login fails.
+     * @param username The username of the user.
+     * @param password The password of the user.
+     * @throws AuthenticationException if login fails.
      */
     public User authenticate(String username, String password) throws AuthenticationException {
         User user = userDAO.getUserByUsername(username);
@@ -28,6 +30,8 @@ public class UserController extends BaseController {
     }
     /**
      * Directs user to the appropriate dashboard based on their role.
+     * @param user The authenticated user.
+     * @param currentFrame The current JFrame to be disposed.
      */
     public void rbacDirect(User user, javax.swing.JFrame currentFrame) {
         if (user.getRole().equals("admin")) {

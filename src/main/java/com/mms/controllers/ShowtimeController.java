@@ -21,7 +21,17 @@ public class ShowtimeController extends BaseController {
 	public List<Movie> getAllMovies() {
 		return movieDAO.getAllMovies();
 	}
-
+	/**
+	 * Validates showtime input fields
+	 * @param selectedMovie The selected movie object.
+	 * @param startDate The start date for the showtimes.
+	 * @param endDate The end date for the showtimes.
+	 * @param numShows The number of shows to be created.
+	 * @param hours List of hour strings for each show.
+	 * @param minutes List of minute strings for each show.
+	 * @param amPm List of AM/PM strings for each show.
+	 * @return true if all fields are valid, false otherwise.
+	 */
 	public boolean validateShowtimeFields(Movie selectedMovie, LocalDate startDate, LocalDate endDate, int numShows, List<String> hours, List<String> minutes, List<String> amPm) {
 		if (selectedMovie == null || startDate == null || endDate == null || numShows < 1) return false;
 		if (hours.size() != numShows || minutes.size() != numShows || amPm.size() != numShows) return false;
@@ -30,7 +40,15 @@ public class ShowtimeController extends BaseController {
 		}
 		return true;
 	}
-
+	/**
+	 * Parses show times from input lists and returns a list of LocalTime objects.
+	 * @param numShows The number of shows.
+	 * @param hours List of hour strings for each show.
+	 * @param minutes List of minute strings for each show.
+	 * @param amPm List of AM/PM strings for each show.
+	 * @return A list of LocalTime objects representing the show times.
+	 * @throws IllegalArgumentException if any time format is invalid.
+	 */
 	public List<LocalTime> parseShowTimes(int numShows, List<String> hours, List<String> minutes, List<String> amPm) throws IllegalArgumentException {
 		List<LocalTime> showTimes = new ArrayList<>();
 		for (int i = 0; i < numShows; i++) {
@@ -46,7 +64,15 @@ public class ShowtimeController extends BaseController {
 		}
 		return showTimes;
 	}
-
+	/**
+	 * Creates showtimes for a movie over a date range and list of times.
+	 * @param movie The movie for which showtimes are being created.
+	 * @param startDate The start date for the showtimes.
+	 * @param endDate The end date for the showtimes.
+	 * @param screenNumber The screen number for the showtimes.
+	 * @param showTimes The list of showtimes to be created.
+	 * @return The number of showtimes successfully created.
+	 */
 	public int createShowtimes(Movie movie, LocalDate startDate, LocalDate endDate, int screenNumber, List<LocalTime> showTimes) {
 		int count = 0;
 		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
@@ -60,6 +86,8 @@ public class ShowtimeController extends BaseController {
 	}
 	/**
 	 * Returns all showtimes for a given movie ID.
+	 * @param movieId The ID of the movie.
+	 * @return List of showtimes for the movie, empty list if none found.
 	 */
 	public List<Showtime> getShowtimesForMovie(int movieId) {
 		return showtimeDAO.getShowtimesByMovieId(movieId);
@@ -67,6 +95,8 @@ public class ShowtimeController extends BaseController {
 
 	/**
 	 * Deletes a showtime by its ID. Returns true if successful, false otherwise.
+	 * @param showtimeId The ID of the showtime to delete.
+	 * @return true if deletion was successful, false otherwise.
 	 */
 	public boolean deleteShowtime(int showtimeId) {
 		return showtimeDAO.deleteShowtime(showtimeId);
