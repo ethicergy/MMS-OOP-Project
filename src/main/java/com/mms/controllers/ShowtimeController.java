@@ -58,17 +58,4 @@ public class ShowtimeController extends BaseController {
 		}
 		return count;
 	}
-	/**
-	 * Returns all showtimes for a given movie ID.
-	 */
-	public List<Showtime> getShowtimesForMovie(int movieId) {
-		return showtimeDAO.getShowtimesByMovieId(movieId);
-	}
-
-	/**
-	 * Deletes a showtime by its ID. Returns true if successful, false otherwise.
-	 */
-	public boolean deleteShowtime(int showtimeId) {
-		return showtimeDAO.deleteShowtime(showtimeId);
-	}
 }

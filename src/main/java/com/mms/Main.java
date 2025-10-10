@@ -27,7 +27,7 @@ public class Main {
         
         // 4. Create one movie
         createMovie();
-        
+
         // 5. Launch the UI
         System.out.println("\nLaunching UI...");
         SwingUtilities.invokeLater(() -> {
